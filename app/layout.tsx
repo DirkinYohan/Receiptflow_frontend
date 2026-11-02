@@ -4,6 +4,8 @@ import './globals.css';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { I18nProvider } from '@/providers/I18nProvider';
+import { ThemeProvider, THEME_INIT_SCRIPT } from '@/providers/ThemeProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -21,13 +23,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${inter.className} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-[#f6f7f8] text-stone-900">
-        <I18nProvider>
-          <ToastProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </ToastProvider>
-        </I18nProvider>
+    // suppressHydrationWarning: the inline script sets the theme class before React hydrates.
+    <html lang="es" className={`${inter.className} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <ThemeProvider>
+          <I18nProvider>
+            <QueryProvider>
+              <ToastProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </ToastProvider>
+            </QueryProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

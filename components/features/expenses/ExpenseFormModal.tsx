@@ -7,13 +7,14 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Alert } from '@/components/ui/Alert';
 import { Expense, ExpenseCreatePayload } from '@/types/expense';
-import { AvailableCategory } from '@/types/category';
-import { SupplierAutocomplete } from '@/types/supplier';
 import { expensesService } from '@/services/expenses.service';
-import { categoriesService } from '@/services/categories.service';
-import { suppliersService } from '@/services/suppliers.service';
 import { useToast } from '@/hooks/useToast';
 import { ApiError } from '@/types/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAvailableCategories, useSupplierOptions } from '@/hooks/queries';
+import { invalidateAfter } from '@/lib/query/invalidate';
+import { useI18n } from '@/providers/I18nProvider';
+import { localizeCategoryName } from '@/lib/i18n/categoryNames';
 
 export function ExpenseFormModal({
   isOpen,
@@ -28,9 +29,12 @@ export function ExpenseFormModal({
 }) {
   const isEditing = !!expense;
   const { success: toastSuccess } = useToast();
+  const { locale, t } = useI18n();
 
-  const [categories, setCategories] = useState<AvailableCategory[]>([]);
-  const [suppliers, setSuppliers] = useState<SupplierAutocomplete[]>([]);
+  // Shared, cached catalogs: opening the form again does not hit the server.
+  const { data: categories = [] } = useAvailableCategories();
+  const { data: suppliers = [] } = useSupplierOptions(isOpen);
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     description: '',
@@ -52,14 +56,6 @@ export function ExpenseFormModal({
 
   useEffect(() => {
     if (isOpen) {
-      // Load available categories and suppliers
-      categoriesService.getAvailableCategories().then((res) => {
-        if (res.data) setCategories(res.data);
-      });
-      suppliersService.autocomplete('').then((res) => {
-        if (res.data) setSuppliers(res.data);
-      });
-
       if (expense) {
         setFormData({
           description: expense.description || '',
@@ -129,16 +125,17 @@ export function ExpenseFormModal({
     try {
       if (isEditing && expense) {
         await expensesService.updateExpense(expense.id, payload);
-        toastSuccess('Gasto actualizado correctamente.');
+        toastSuccess(t('expenseForm.updated'));
       } else {
         await expensesService.createExpense(payload);
-        toastSuccess('Gasto registrado con éxito.');
+        toastSuccess(t('expenseForm.created'));
       }
+      invalidateAfter(queryClient, 'expense');
       onSuccess();
       onClose();
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || 'Error al guardar el gasto.');
+      setErrorMessage(apiErr.message || t('expenseForm.error'));
     } finally {
       setIsLoading(false);
     }
@@ -148,8 +145,8 @@ export function ExpenseFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
-      description="Registra un gasto manual o edita la información del comprobante."
+      title={isEditing ? t('expenseForm.editTitle') : t('expenseForm.newTitle')}
+      description={t('expenseForm.description')}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -160,10 +157,10 @@ export function ExpenseFormModal({
         )}
 
         <Input
-          label="Descripción"
+          label={t('expenseForm.descriptionLabel')}
           name="description"
           required
-          placeholder="Ej: Almuerzo de trabajo con cliente"
+          placeholder={t('expenseForm.descriptionPlaceholder')}
           value={formData.description}
           onChange={handleChange}
           disabled={isLoading}
@@ -171,7 +168,7 @@ export function ExpenseFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Monto"
+            label={t('expenseForm.amount')}
             name="amount"
             type="number"
             step="0.01"
@@ -182,15 +179,15 @@ export function ExpenseFormModal({
             disabled={isLoading}
           />
           <Select
-            label="Moneda"
+            label={t('expenseForm.currency')}
             name="currency"
             value={formData.currency}
             onChange={handleChange}
             options={[
-              { value: 'COP', label: 'COP - Peso Colombiano' },
-              { value: 'MXN', label: 'MXN - Peso Mexicano' },
-              { value: 'USD', label: 'USD - Dólar Estadounidense' },
-              { value: 'EUR', label: 'EUR - Euro' },
+              { value: 'COP', label: t('currency.COP') },
+              { value: 'MXN', label: t('currency.MXN') },
+              { value: 'USD', label: t('currency.USD') },
+              { value: 'EUR', label: t('currency.EUR') },
             ]}
             disabled={isLoading}
           />
@@ -198,24 +195,24 @@ export function ExpenseFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
-            label="Categoría"
+            label={t('expenseForm.category')}
             name="category"
             value={formData.category}
             onChange={handleChange}
-            placeholder="Selecciona una categoría"
+            placeholder={t('expenseForm.categoryPlaceholder')}
             options={categories.map((c) => ({
               value: c.id,
-              label: `${c.name} ${c.is_system ? '(Sistema)' : '(Personal)'}`,
+              label: `${localizeCategoryName(c, locale)} ${c.is_system ? t('expenseForm.systemTag') : t('expenseForm.personalTag')}`,
             }))}
             disabled={isLoading}
           />
 
           <Select
-            label="Proveedor"
+            label={t('expenseForm.supplier')}
             name="supplier"
             value={formData.supplier}
             onChange={handleChange}
-            placeholder="Selecciona un proveedor"
+            placeholder={t('expenseForm.supplierPlaceholder')}
             options={suppliers.map((s) => ({
               value: s.id,
               label: `${s.name} ${s.tax_id ? `(${s.tax_id})` : ''}`,
@@ -226,7 +223,7 @@ export function ExpenseFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Fecha y hora del gasto"
+            label={t('expenseForm.date')}
             name="incurred_at"
             type="datetime-local"
             required
@@ -236,17 +233,17 @@ export function ExpenseFormModal({
           />
 
           <Select
-            label="Método de Pago"
+            label={t('expenseForm.method')}
             name="payment_method"
             value={formData.payment_method}
             onChange={handleChange}
-            placeholder="Selecciona método"
+            placeholder={t('expenseForm.methodPlaceholder')}
             options={[
-              { value: 'cash', label: 'Efectivo' },
-              { value: 'card', label: 'Tarjeta' },
-              { value: 'transfer', label: 'Transferencia' },
-              { value: 'digital', label: 'Pago digital' },
-              { value: 'other', label: 'Otro' },
+              { value: 'cash', label: t('method.cash') },
+              { value: 'card', label: t('method.card') },
+              { value: 'transfer', label: t('method.transfer') },
+              { value: 'digital', label: t('method.digital') },
+              { value: 'other', label: t('method.other') },
             ]}
             disabled={isLoading}
           />
@@ -259,10 +256,10 @@ export function ExpenseFormModal({
               name="is_recurring"
               checked={formData.is_recurring}
               onChange={handleChange}
-              className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500"
+              className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 dark:text-indigo-400"
               disabled={isLoading}
             />
-            <span>Gasto Recurrente</span>
+            <span>{t('expenseForm.recurring')}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
@@ -271,16 +268,16 @@ export function ExpenseFormModal({
               name="is_reimbursable"
               checked={formData.is_reimbursable}
               onChange={handleChange}
-              className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500"
+              className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 dark:text-indigo-400"
               disabled={isLoading}
             />
-            <span>Reembolsable</span>
+            <span>{t('expenseForm.reimbursable')}</span>
           </label>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-            Notas
+            {t('expenseForm.notes')}
           </label>
           <textarea
             name="notes"
@@ -288,17 +285,17 @@ export function ExpenseFormModal({
             value={formData.notes}
             onChange={handleChange}
             className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-            placeholder="Comentarios adicionales"
+            placeholder={t('expenseForm.notesPlaceholder')}
             disabled={isLoading}
           />
         </div>
 
         <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button type="submit" isLoading={isLoading}>
-            {isEditing ? 'Guardar Cambios' : 'Registrar Gasto'}
+            {isEditing ? t('common.saveChanges') : t('expenseForm.submitNew')}
           </Button>
         </div>
       </form>

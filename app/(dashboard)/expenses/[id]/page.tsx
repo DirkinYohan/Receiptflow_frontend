@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -24,9 +25,11 @@ import { DocumentBreakdown } from '@/components/features/documents/DocumentBreak
 import { expensesService } from '@/services/expenses.service';
 import { ExpenseDetail } from '@/types/expense';
 import { formatCurrency, formatDateTime } from '@/lib/formatters';
-import { PAYMENT_METHOD_LABELS } from '@/lib/constants';
 import { useToast } from '@/hooks/useToast';
 import { useI18n } from '@/providers/I18nProvider';
+import { useExpense } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
 import { localizeCategoryName } from '@/lib/i18n/categoryNames';
 
 export default function ExpenseDetailPage() {
@@ -37,42 +40,31 @@ export default function ExpenseDetailPage() {
 
   const { success: toastSuccess, error: toastError } = useToast();
 
-  const [expense, setExpense] = useState<ExpenseDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const fetchExpense = useCallback(async () => {
-    if (!expId) return;
-    try {
-      const res = await expensesService.getExpense(expId);
-      if (res.data) setExpense(res.data);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [expId]);
-
-  useEffect(() => {
-    fetchExpense();
-  }, [fetchExpense]);
+  const expenseQuery = useExpense(expId);
+  const expense = expenseQuery.data ?? null;
+  const isLoading = expenseQuery.isPending;
+  const hasError = expenseQuery.isError;
 
   const handleDelete = async () => {
-    if (!confirm('¿Eliminar este gasto?')) return;
+    if (!confirm(t('expenses.deleteConfirm'))) return;
     try {
       await expensesService.deleteExpense(expId);
-      toastSuccess('Gasto eliminado.');
+      queryClient.removeQueries({ queryKey: qk.expenses.detail(expId) });
+      invalidateAfter(queryClient, 'expense');
+      toastSuccess(t('expenses.deleted'));
       router.push('/expenses');
     } catch {
-      toastError('Error al eliminar el gasto.');
+      toastError(t('expenses.deleteError'));
     }
   };
 
   if (isLoading) {
     return (
       <div className="py-20 flex justify-center">
-        <LoadingSpinner size="lg" text="Cargando detalle del gasto..." />
+        <LoadingSpinner size="lg" text={t('expenses.loadingDetail')} />
       </div>
     );
   }
@@ -81,9 +73,9 @@ export default function ExpenseDetailPage() {
     return (
       <div className="py-12">
         <ErrorState
-          title="Gasto no encontrado"
-          message="No se pudo encontrar el gasto solicitado."
-          onRetry={fetchExpense}
+          title={t('expenses.notFound')}
+          message={t('expenses.notFoundText')}
+          onRetry={() => expenseQuery.refetch()}
         />
       </div>
     );
@@ -110,12 +102,12 @@ export default function ExpenseDetailPage() {
               {expense.is_recurring && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
                   <Repeat className="w-3 h-3" />
-                  <span>Recurrente</span>
+                  <span>{t('expenses.recurring')}</span>
                 </span>
               )}
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Registrado el {formatDateTime(expense.created_at)}
+            <p className="text-xs text-zinc-400 mt-0.5 dark:text-zinc-500">
+              {t('expenses.registeredOn', { date: formatDateTime(expense.created_at) })}
             </p>
           </div>
         </div>
@@ -127,7 +119,7 @@ export default function ExpenseDetailPage() {
             onClick={() => setIsEditModalOpen(true)}
             leftIcon={<Edit className="w-4 h-4" />}
           >
-            Editar Gasto
+            {t('expenses.edit')}
           </Button>
 
           <Button
@@ -142,33 +134,33 @@ export default function ExpenseDetailPage() {
       {/* Cards breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block">
-            Monto Total
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
+            {t('expenses.totalAmount')}
           </span>
           <p className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">
-            {formatCurrency(expense.amount, expense.currency)}
+            {formatCurrency(expense.total_amount, expense.currency)}
           </p>
-          <span className="text-xs text-zinc-400">Moneda: {expense.currency}</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">{t('expenses.currencyLabel', { currency: expense.currency })}</span>
         </Card>
 
         <Card className="p-4">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block">
-            Categoría
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
+            {t('expenses.colCategory')}
           </span>
           <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
             {localizeCategoryName(expense.category_name, locale) || t('common.noCategory')}
           </p>
-          <span className="text-xs text-zinc-400">Clasificación de gasto</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">{t('expenses.categoryHint')}</span>
         </Card>
 
         <Card className="p-4">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block">
-            Proveedor
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
+            {t('expenses.supplier')}
           </span>
           <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1 truncate">
-            {expense.supplier_name || 'Sin proveedor'}
+            {expense.supplier_name || t('dashboard.noSupplier')}
           </p>
-          <span className="text-xs text-zinc-400">Comercio o entidad</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">{t('expenses.supplierHint')}</span>
         </Card>
       </div>
 
@@ -177,27 +169,27 @@ export default function ExpenseDetailPage() {
         <div className="lg:col-span-7 space-y-6">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Detalles del Comprobante</CardTitle>
+              <CardTitle className="text-base">{t('expenses.details')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3.5 text-xs sm:text-sm">
               <div className="flex justify-between py-1.5 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-zinc-500">Fecha del gasto</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t('expenses.incurredAt')}</span>
                 <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                   {formatDateTime(expense.incurred_at)}
                 </span>
               </div>
 
               <div className="flex justify-between py-1.5 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-zinc-500">Método de pago</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t('expenses.paymentMethod')}</span>
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {expense.payment_method
-                    ? PAYMENT_METHOD_LABELS[expense.payment_method] || expense.payment_method
-                    : 'No especificado'}
+                    ? t(`method.${expense.payment_method}`)
+                    : t('method.empty')}
                 </span>
               </div>
 
               <div className="flex justify-between py-1.5 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-zinc-500">Impuesto</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t('expenses.tax')}</span>
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {expense.tax_amount != null && expense.tax_amount !== ''
                     ? formatCurrency(expense.tax_amount, expense.currency)
@@ -206,15 +198,15 @@ export default function ExpenseDetailPage() {
               </div>
 
               <div className="flex justify-between py-1.5 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-zinc-500">Reembolsable</span>
+                <span className="text-zinc-500 dark:text-zinc-400">{t('expenses.reimbursable')}</span>
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {expense.is_reimbursable ? 'Sí' : 'No'}
+                  {expense.is_reimbursable ? t('common.yes') : t('common.no')}
                 </span>
               </div>
 
               {expense.notes && (
                 <div className="pt-2">
-                  <span className="text-zinc-500 block mb-1">Notas</span>
+                  <span className="text-zinc-500 block mb-1 dark:text-zinc-400">{t('expenses.notes')}</span>
                   <p className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-700 dark:text-zinc-300">
                     {expense.notes}
                   </p>
@@ -228,7 +220,7 @@ export default function ExpenseDetailPage() {
           <Card className="h-full flex flex-col justify-between">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4 text-indigo-600" />
+                <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>{t('detail.original')}</span>
               </CardTitle>
             </CardHeader>
@@ -239,7 +231,7 @@ export default function ExpenseDetailPage() {
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-stone-800">
+                    <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
                       {t('expenses.fromDocument')}
                     </p>
                   </div>
@@ -250,7 +242,7 @@ export default function ExpenseDetailPage() {
                   </Link>
                 </div>
               ) : (
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">
                   {t('expenses.manual')}
                 </p>
               )}
@@ -268,7 +260,7 @@ export default function ExpenseDetailPage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         expense={expense}
-        onSuccess={fetchExpense}
+        onSuccess={() => undefined}
       />
     </div>
   );

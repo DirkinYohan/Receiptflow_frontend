@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -22,9 +23,10 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ExpenseFormModal } from '@/components/features/expenses/ExpenseFormModal';
 import { expensesService } from '@/services/expenses.service';
-import { categoriesService } from '@/services/categories.service';
-import { Expense, ExpenseStats } from '@/types/expense';
-import { AvailableCategory } from '@/types/category';
+import { useAvailableCategories, useExpenseStats, useExpenses } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
+import { Expense } from '@/types/expense';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/hooks/useToast';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -36,11 +38,7 @@ export default function ExpensesPage() {
   const { locale, t } = useI18n();
   const { success: toastSuccess, error: toastError } = useToast();
 
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [stats, setStats] = useState<ExpenseStats | null>(null);
-  const [categories, setCategories] = useState<AvailableCategory[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,8 +47,6 @@ export default function ExpensesPage() {
   const [paymentFilter, setPaymentFilter] = useState('');
   const [ordering, setOrdering] = useState('-incurred_at');
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -67,59 +63,35 @@ export default function ExpensesPage() {
     }
   };
 
-  const fetchExpenses = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
-
-    try {
-      const params: Record<string, any> = {
-        page: currentPage,
-        page_size: 15,
-        ordering,
-      };
-
-      if (categoryFilter) params.category = categoryFilter;
-      if (paymentFilter) params.payment_method = paymentFilter;
-      if (debouncedSearch) params.search = debouncedSearch;
-
-      const [listRes, statsRes] = await Promise.all([
-        expensesService.getExpenses(params),
-        expensesService.getStats(params),
-      ]);
-
-      setExpenses(listRes.results || []);
-      setTotalCount(listRes.count || 0);
-      setTotalPages(listRes.total_pages || 1);
-      if (statsRes.data) setStats(statsRes.data);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, categoryFilter, paymentFilter, debouncedSearch, ordering]);
-
-  useEffect(() => {
-    categoriesService.getAvailableCategories().then((res) => {
-      if (res.data) setCategories(res.data);
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
+  // Totals depend only on the filters, so paging or sorting reuses them instead of asking again.
+  const filters = {
+    ...(categoryFilter ? { category: Number(categoryFilter) } : {}),
+    ...(paymentFilter ? { payment_method: paymentFilter } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  };
+  const expensesQuery = useExpenses({ ...filters, page: currentPage, page_size: 15, ordering });
+  const statsQuery = useExpenseStats(filters);
+  const { data: categories = [] } = useAvailableCategories();
+  const expenses = expensesQuery.data?.results ?? [];
+  const totalCount = expensesQuery.data?.count ?? 0;
+  const totalPages = expensesQuery.data?.total_pages ?? 1;
+  const stats = statsQuery.data ?? null;
+  const isLoading = expensesQuery.isPending;
+  const hasError = expensesQuery.isError && !expensesQuery.data;
 
   const handleDelete = async (expense: Expense, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm(`¿Eliminar el gasto "${expense.description}"?`)) return;
+    if (!confirm(t('expenses.deleteNamed', { name: expense.description }))) return;
 
     setDeletingId(expense.id);
     try {
       await expensesService.deleteExpense(expense.id);
-      toastSuccess('Gasto eliminado exitosamente.');
-      fetchExpenses();
+      queryClient.removeQueries({ queryKey: qk.expenses.detail(expense.id) });
+      toastSuccess(t('expenses.deleted'));
+      invalidateAfter(queryClient, 'expense');
     } catch {
-      toastError('Error al eliminar el gasto.');
+      toastError(t('expenses.deleteError'));
     } finally {
       setDeletingId(null);
     }
@@ -173,7 +145,7 @@ export default function ExpensesPage() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               {t('expenses.filtered')}
             </span>
             <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
@@ -181,7 +153,7 @@ export default function ExpensesPage() {
             </p>
           </div>
           <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               {t('expenses.average')}
             </span>
             <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
@@ -189,16 +161,16 @@ export default function ExpensesPage() {
             </p>
           </div>
           <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-              Gastos Totales
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              {t('expenses.totalCount')}
             </span>
             <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
               {stats.count}
             </p>
           </div>
           <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-              Recurrentes
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              {t('expenses.recurringCount')}
             </span>
             <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
               {stats.recurring_count}
@@ -230,8 +202,8 @@ export default function ExpensesPage() {
             }}
             placeholder={t('expenses.allCategories')}
             options={[
-              { value: '', label: 'Todas las categorías' },
-              ...categories.map((c) => ({ value: c.id, label: c.name })),
+              { value: '', label: t('expenses.allCategories') },
+              ...categories.map((c) => ({ value: c.id, label: localizeCategoryName(c, locale) })),
             ]}
           />
         </div>
@@ -245,11 +217,11 @@ export default function ExpensesPage() {
             }}
             placeholder={t('expenses.allMethods')}
             options={[
-              { value: '', label: 'Todos los métodos' },
-              { value: 'cash', label: 'Efectivo' },
-              { value: 'card', label: 'Tarjeta' },
-              { value: 'transfer', label: 'Transferencia' },
-              { value: 'digital', label: 'Digital' },
+              { value: '', label: t('expenses.allMethods') },
+              { value: 'cash', label: t('method.cash') },
+              { value: 'card', label: t('method.card') },
+              { value: 'transfer', label: t('method.transfer') },
+              { value: 'digital', label: t('method.digital') },
             ]}
           />
         </div>
@@ -262,10 +234,10 @@ export default function ExpensesPage() {
               setCurrentPage(1);
             }}
             options={[
-              { value: '-incurred_at', label: 'Más recientes' },
-              { value: 'incurred_at', label: 'Más antiguos' },
-              { value: '-amount', label: 'Mayor monto' },
-              { value: 'amount', label: 'Menor monto' },
+              { value: '-incurred_at', label: t('expenses.sortRecent') },
+              { value: 'incurred_at', label: t('expenses.sortOldest') },
+              { value: '-amount', label: t('expenses.sortHigh') },
+              { value: 'amount', label: t('expenses.sortLow') },
             ]}
           />
         </div>
@@ -274,13 +246,13 @@ export default function ExpensesPage() {
       {/* Content / Table */}
       {isLoading ? (
         <div className="py-16">
-          <LoadingSpinner size="lg" text="Cargando gastos..." />
+          <LoadingSpinner size="lg" text={t('expenses.loading')} />
         </div>
       ) : hasError ? (
         <ErrorState
           title={t('common.errorTitle')}
           message={t('expenses.loadError')}
-          onRetry={fetchExpenses}
+          onRetry={() => expensesQuery.refetch()}
         />
       ) : expenses.length === 0 ? (
         <EmptyState
@@ -299,7 +271,7 @@ export default function ExpensesPage() {
               }}
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              Registrar Gasto
+              {t('expenses.new')}
             </Button>
           }
         />
@@ -309,12 +281,12 @@ export default function ExpensesPage() {
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Descripción</th>
-                  <th className="py-3 px-4">Categoría</th>
-                  <th className="py-3 px-4">Fecha</th>
-                  <th className="py-3 px-4">Método</th>
-                  <th className="py-3 px-4">Total</th>
-                  <th className="py-3 px-4 text-right">Acciones</th>
+                  <th className="py-3 px-4">{t('expenses.colDescription')}</th>
+                  <th className="py-3 px-4">{t('expenses.colCategory')}</th>
+                  <th className="py-3 px-4">{t('expenses.colDate')}</th>
+                  <th className="py-3 px-4">{t('expenses.colMethod')}</th>
+                  <th className="py-3 px-4">{t('expenses.colTotal')}</th>
+                  <th className="py-3 px-4 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
@@ -333,12 +305,12 @@ export default function ExpensesPage() {
                           <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[240px]">
                             {expense.description}
                           </p>
-                          <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-0.5">
+                          <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-0.5 dark:text-zinc-500">
                             {expense.supplier_name && <span>{expense.supplier_name}</span>}
                             {expense.is_recurring && (
                               <span className="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 font-medium">
                                 <Repeat className="w-3 h-3" />
-                                <span>Recurrente</span>
+                                <span>{t('expenses.recurring')}</span>
                               </span>
                             )}
                           </div>
@@ -361,7 +333,7 @@ export default function ExpensesPage() {
                     </td>
 
                     <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
-                      {formatCurrency(expense.amount, expense.currency)}
+                      {formatCurrency(expense.total_amount, expense.currency)}
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
@@ -371,25 +343,25 @@ export default function ExpensesPage() {
                       >
                         <Link
                           href={`/expenses/${expense.id}`}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-zinc-800 transition-colors"
-                          title="Ver detalle"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-zinc-800 transition-colors dark:text-zinc-500 dark:hover:text-indigo-400"
+                          title={t('expenses.viewDetail')}
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
 
                         <button
-                          title="Editar gasto"
+                          title={t('expenses.edit')}
                           onClick={(e) => handleEdit(expense, e)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
 
                         <button
-                          title="Eliminar gasto"
+                          title={t('expenses.delete')}
                           disabled={deletingId === expense.id}
                           onClick={(e) => handleDelete(expense, e)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:opacity-50 dark:text-zinc-500 dark:hover:text-rose-400"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -419,7 +391,7 @@ export default function ExpensesPage() {
           setSelectedExpense(null);
         }}
         expense={selectedExpense}
-        onSuccess={fetchExpenses}
+        onSuccess={() => undefined}
       />
     </div>
   );

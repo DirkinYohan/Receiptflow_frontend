@@ -1,6 +1,7 @@
 import { API_BASE_URL } from './constants';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens, isTokenExpired } from './auth-tokens';
 import { ApiError } from '@/types/api';
+import { currentLocale, translate } from './i18n/translate';
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
@@ -78,6 +79,7 @@ export async function apiClient<T>(
   }
 
   const reqHeaders: Record<string, string> = {
+    'Accept-Language': currentLocale(),
     ...(headers as Record<string, string>),
   };
 
@@ -118,7 +120,9 @@ export async function apiClient<T>(
       headers: reqHeaders,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Error de conexión con el servidor.';
+    // A cancelled request (newer search, closed page) is not a connection error.
+    if (err instanceof DOMException && err.name === 'AbortError') throw err;
+    const message = translate('api.connection');
     const error: ApiError = {
       message,
       statusCode: 0,
@@ -171,7 +175,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
   if (!response.ok) {
     const error: ApiError = {
-      message: 'Ocurrió un error inesperado.',
+      message: translate('api.unexpected'),
       statusCode: response.status,
     };
 
@@ -181,7 +185,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       } else if (typeof data.detail === 'string') {
         error.message = data.detail;
       } else if (Array.isArray(data.errors) && data.errors.length > 0) {
-        error.message = typeof data.errors[0] === 'string' ? data.errors[0] : (data.errors[0].message || 'Error de validación');
+        error.message = typeof data.errors[0] === 'string' ? data.errors[0] : (data.errors[0].message || translate('api.validation'));
       }
 
       // Collect field errors
@@ -229,7 +233,7 @@ export async function apiDownload(
   let response = await request(token);
   if (response.status === 401) response = await request(await refreshAccessToken());
   if (!response.ok) {
-    const error: ApiError = { message: 'No se pudo descargar el archivo.', statusCode: response.status };
+    const error: ApiError = { message: translate('api.download'), statusCode: response.status };
     throw error;
   }
 

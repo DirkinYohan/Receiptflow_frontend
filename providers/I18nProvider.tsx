@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useSyncExternalStore } from 'react';
-import { Locale, messages } from '@/lib/i18n/messages';
+import { Locale } from '@/lib/i18n/messages';
+import { setTranslateLocale, translateFor } from '@/lib/i18n/translate';
 import { setFormatLocale } from '@/lib/formatters';
 
 const STORAGE_KEY = 'rf-lang';
@@ -25,21 +26,12 @@ type I18nValue = {
 
 const I18nContext = React.createContext<I18nValue | undefined>(undefined);
 
-function lookup(locale: Locale, key: string): string {
-  const value = key.split('.').reduce<unknown>((node, part) => {
-    if (node && typeof node === 'object' && part in node) {
-      return (node as Record<string, unknown>)[part];
-    }
-    return undefined;
-  }, messages[locale]);
-  return typeof value === 'string' ? value : key;
-}
-
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const locale = useSyncExternalStore(subscribe, readLocale, () => 'es' as Locale);
 
   useEffect(() => {
     setFormatLocale(locale);
+    setTranslateLocale(locale);
     document.documentElement.lang = locale;
   }, [locale]);
 
@@ -49,15 +41,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string, vars?: Record<string, string | number>) => {
-      let text = lookup(locale, key);
-      if (vars) {
-        Object.entries(vars).forEach(([name, value]) => {
-          text = text.replaceAll(`{${name}}`, String(value));
-        });
-      }
-      return text;
-    },
+    (key: string, vars?: Record<string, string | number>) => translateFor(locale, key, vars),
     [locale]
   );
 

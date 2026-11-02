@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
   Plus,
@@ -27,82 +28,71 @@ import { Supplier } from '@/types/supplier';
 import { useToast } from '@/hooks/useToast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useI18n } from '@/providers/I18nProvider';
+import { useSuppliers } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
+import { PaginatedResponse } from '@/types/api';
 
 export default function SuppliersPage() {
   const { success: toastSuccess, error: toastError } = useToast();
   const { t } = useI18n();
 
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filterTab, setFilterTab] = useState<'all' | 'favorites'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 350);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
-  const fetchSuppliers = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
+  const params = {
+    page: currentPage,
+    page_size: 15,
+    ...(filterTab === 'favorites' ? { is_favorite: true } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  };
+  const listKey = qk.suppliers.list(params);
+  const suppliersQuery = useSuppliers(params);
+  const suppliers = suppliersQuery.data?.results ?? [];
+  const totalCount = suppliersQuery.data?.count ?? 0;
+  const totalPages = suppliersQuery.data?.total_pages ?? 1;
+  const isLoading = suppliersQuery.isPending;
+  const hasError = suppliersQuery.isError && !suppliersQuery.data;
 
-    try {
-      const params: Record<string, any> = {
-        page: currentPage,
-        page_size: 15,
-      };
-
-      if (filterTab === 'favorites') {
-        params.is_favorite = true;
-      }
-      if (debouncedSearch) {
-        params.search = debouncedSearch;
-      }
-
-      const res = await suppliersService.getSuppliers(params);
-      setSuppliers(res.results || []);
-      setTotalCount(res.count || 0);
-      setTotalPages(res.total_pages || 1);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, filterTab, debouncedSearch]);
-
-  useEffect(() => {
-    fetchSuppliers();
-  }, [fetchSuppliers]);
+  const patchList = (update: (rows: Supplier[]) => Supplier[]) =>
+    queryClient.setQueryData<PaginatedResponse<Supplier>>(listKey, (page) =>
+      page ? { ...page, results: update(page.results ?? []) } : page
+    );
 
   const handleToggleFavorite = async (supplier: Supplier, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // Optimistic star; reverted if the server refuses.
+    const previous = queryClient.getQueryData<PaginatedResponse<Supplier>>(listKey);
+    patchList((rows) => rows.map((s) => (s.id === supplier.id ? { ...s, is_favorite: !supplier.is_favorite } : s)));
     try {
       const res = await suppliersService.toggleFavorite(supplier.id);
       const isFav = res.data?.is_favorite ?? !supplier.is_favorite;
-      setSuppliers((prev) =>
-        prev.map((s) => (s.id === supplier.id ? { ...s, is_favorite: isFav } : s))
-      );
-      toastSuccess(
-        isFav ? 'Marcado como favorito.' : 'Removido de favoritos.'
-      );
+      toastSuccess(isFav ? t('suppliers.favoriteOn') : t('suppliers.favoriteOff'));
+      // Other pages (e.g. the favorites tab) are only marked stale, not refetched now.
+      queryClient.invalidateQueries({ queryKey: qk.suppliers.all, refetchType: 'none' });
     } catch {
-      toastError('No se pudo actualizar el estado de favorito.');
+      queryClient.setQueryData(listKey, previous);
+      toastError(t('suppliers.favoriteError'));
     }
   };
 
   const handleDelete = async (supplier: Supplier) => {
-    if (!confirm(`¿Eliminar al proveedor "${supplier.name}"?`)) return;
+    if (!confirm(t('suppliers.deleteConfirm', { name: supplier.name }))) return;
     try {
       await suppliersService.deleteSupplier(supplier.id);
-      toastSuccess('Proveedor eliminado.');
-      fetchSuppliers();
+      patchList((rows) => rows.filter((s) => s.id !== supplier.id));
+      toastSuccess(t('suppliers.deleted'));
+      invalidateAfter(queryClient, 'supplier');
     } catch {
-      toastError('Error al eliminar el proveedor.');
+      toastError(t('suppliers.deleteError'));
     }
   };
 
@@ -112,8 +102,8 @@ export default function SuppliersPage() {
   };
 
   const tabs = [
-    { id: 'all', label: 'Todos los Proveedores' },
-    { id: 'favorites', label: 'Favoritos' },
+    { id: 'all', label: t('suppliers.tabAll') },
+    { id: 'favorites', label: t('suppliers.tabFavorites') },
   ];
 
   return (
@@ -136,7 +126,7 @@ export default function SuppliersPage() {
           }}
           leftIcon={<Plus className="w-4 h-4" />}
         >
-          Nuevo Proveedor
+          {t('suppliers.new')}
         </Button>
       </div>
 
@@ -166,22 +156,22 @@ export default function SuppliersPage() {
       {/* Content */}
       {isLoading ? (
         <div className="py-16">
-          <LoadingSpinner size="lg" text="Cargando proveedores..." />
+          <LoadingSpinner size="lg" text={t('suppliers.loading')} />
         </div>
       ) : hasError ? (
         <ErrorState
-          title="Error al cargar proveedores"
-          message="No se pudieron sincronizar los proveedores con el servidor."
-          onRetry={fetchSuppliers}
+          title={t('suppliers.loadErrorTitle')}
+          message={t('suppliers.loadErrorText')}
+          onRetry={() => suppliersQuery.refetch()}
         />
       ) : suppliers.length === 0 ? (
         <EmptyState
           icon={Building2}
-          title="No se encontraron proveedores"
+          title={t('suppliers.emptyTitle')}
           description={
             searchQuery || filterTab !== 'all'
-              ? 'No hay proveedores que coincidan con la búsqueda.'
-              : 'Los proveedores se crean automáticamente al procesar tus facturas o puedes agregarlos manualmente.'
+              ? t('suppliers.emptySearch')
+              : t('suppliers.emptyHint')
           }
           action={
             <Button
@@ -191,7 +181,7 @@ export default function SuppliersPage() {
               }}
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              Registrar Proveedor
+              {t('suppliers.register')}
             </Button>
           }
         />
@@ -221,11 +211,11 @@ export default function SuppliersPage() {
 
                     <button
                       onClick={(e) => handleToggleFavorite(supplier, e)}
-                      title={supplier.is_favorite ? 'Remover favorito' : 'Marcar favorito'}
+                      title={supplier.is_favorite ? t('suppliers.favoriteRemove') : t('suppliers.favoriteAdd')}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                         supplier.is_favorite
                           ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40'
-                          : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                          : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-600'
                       }`}
                     >
                       <Star className={`w-4 h-4 ${supplier.is_favorite ? 'fill-current' : ''}`} />
@@ -236,47 +226,47 @@ export default function SuppliersPage() {
                   <div className="mt-4 space-y-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                     {supplier.email && (
                       <p className="flex items-center gap-2 truncate">
-                        <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                        <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
                         <span className="truncate">{supplier.email}</span>
                       </p>
                     )}
                     {supplier.phone && (
                       <p className="flex items-center gap-2 truncate">
-                        <Phone className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                        <Phone className="w-3.5 h-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
                         <span>{supplier.phone}</span>
                       </p>
                     )}
                     {supplier.address && (
-                      <p className="truncate text-zinc-400">{supplier.address}</p>
+                      <p className="truncate text-zinc-400 dark:text-zinc-500">{supplier.address}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Footer with activity and actions */}
                 <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-3 text-zinc-400 font-medium">
+                  <div className="flex items-center gap-3 text-zinc-400 font-medium dark:text-zinc-500">
                     <span className="inline-flex items-center gap-1">
                       <FileText className="w-3.5 h-3.5" />
-                      <span>{supplier.document_count ?? 0} docs</span>
+                      <span>{t('suppliers.docs', { count: supplier.document_count ?? 0 })}</span>
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Receipt className="w-3.5 h-3.5" />
-                      <span>{supplier.expense_count ?? 0} gastos</span>
+                      <span>{t('suppliers.expenses', { count: supplier.expense_count ?? 0 })}</span>
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleEdit(supplier)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      title="Editar"
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
+                      title={t('common.edit')}
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(supplier)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      title="Eliminar"
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-rose-400"
+                      title={t('common.delete')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -304,7 +294,7 @@ export default function SuppliersPage() {
           setSelectedSupplier(null);
         }}
         supplier={selectedSupplier}
-        onSuccess={fetchSuppliers}
+        onSuccess={() => invalidateAfter(queryClient, 'supplier')}
       />
     </div>
   );

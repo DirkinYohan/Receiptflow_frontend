@@ -99,16 +99,16 @@ export function SupplierFormModal({
     try {
       if (isEditing && supplier) {
         await suppliersService.updateSupplier(supplier.id, payload);
-        toastSuccess('Proveedor actualizado correctamente.');
+        toastSuccess(t('supplierForm.updated'));
       } else {
         await suppliersService.createSupplier(payload);
-        toastSuccess('Proveedor creado con éxito.');
+        toastSuccess(t('supplierForm.created'));
       }
       onSuccess();
       onClose();
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || 'Error al guardar el proveedor.');
+      setErrorMessage(apiErr.message || t('supplierForm.error'));
     } finally {
       setIsLoading(false);
     }
@@ -118,8 +118,8 @@ export function SupplierFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor'}
-      description="Registra la información fiscal y de contacto de comercios o empresas."
+      title={isEditing ? t('supplierForm.editTitle') : t('supplierForm.newTitle')}
+      description={t('supplierForm.description')}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,10 +131,10 @@ export function SupplierFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Razón Social o Nombre"
+            label={t('supplierForm.name')}
             name="name"
             required
-            placeholder="Ej: Almacenes Éxito S.A."
+            placeholder={t('supplierForm.namePlaceholder')}
             value={formData.name}
             onChange={handleChange}
             disabled={isLoading}
@@ -142,7 +142,7 @@ export function SupplierFormModal({
           <Input
             label={t('suppliers.id')}
             name="tax_id"
-            placeholder="Ej: 890.900.608-9"
+            placeholder={t('supplierForm.taxIdPlaceholder')}
             value={formData.tax_id}
             onChange={handleChange}
             disabled={isLoading}
@@ -151,7 +151,7 @@ export function SupplierFormModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Correo electrónico"
+            label={t('supplierForm.email')}
             name="email"
             type="email"
             placeholder="contacto@empresa.com"
@@ -160,7 +160,7 @@ export function SupplierFormModal({
             disabled={isLoading}
           />
           <Input
-            label="Teléfono"
+            label={t('supplierForm.phone')}
             name="phone"
             placeholder="+57 (601) 555-0199"
             value={formData.phone}
@@ -170,16 +170,16 @@ export function SupplierFormModal({
         </div>
 
         <Input
-          label="Dirección"
+          label={t('supplierForm.address')}
           name="address"
-          placeholder="Calle 100 # 15-20, Bogotá"
+          placeholder={t('supplierForm.addressPlaceholder')}
           value={formData.address}
           onChange={handleChange}
           disabled={isLoading}
         />
 
         <Input
-          label="Sitio Web (opcional)"
+          label={t('supplierForm.website')}
           name="website"
           placeholder="https://empresa.com"
           value={formData.website}
@@ -194,17 +194,17 @@ export function SupplierFormModal({
             name="is_favorite"
             checked={formData.is_favorite}
             onChange={handleChange}
-            className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer dark:text-indigo-400"
             disabled={isLoading}
           />
           <label htmlFor="is_favorite" className="text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
-            Marcar como proveedor frecuente / favorito
+            {t('supplierForm.favorite')}
           </label>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-            Notas
+            {t('supplierForm.notes')}
           </label>
           <textarea
             name="notes"
@@ -212,17 +212,17 @@ export function SupplierFormModal({
             value={formData.notes}
             onChange={handleChange}
             className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-            placeholder="Condiciones de pago, contacto comercial, etc."
+            placeholder={t('supplierForm.notesPlaceholder')}
             disabled={isLoading}
           />
         </div>
 
         <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button type="submit" isLoading={isLoading}>
-            {isEditing ? 'Guardar Cambios' : 'Crear Proveedor'}
+            {isEditing ? t('common.saveChanges') : t('supplierForm.submitNew')}
           </Button>
         </div>
       </form>

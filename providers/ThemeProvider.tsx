@@ -7,10 +7,6 @@ export type Theme = 'light' | 'dark';
 export const THEME_STORAGE_KEY = 'rf-theme';
 const CHANGE_EVENT = 'rf-theme-change';
 
-/**
- * Runs inline in <head> before the first paint: applies the saved theme,
- * or the system preference the first time, so the page never flashes light.
- */
 export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var r=document.documentElement;r.classList.toggle("dark",t==="dark");r.style.colorScheme=t}catch(e){}})()`;
 
 function readTheme(): Theme {
@@ -30,6 +26,15 @@ type ThemeValue = {
 
 const ThemeContext = React.createContext<ThemeValue | undefined>(undefined);
 
+function storeTheme(theme: Theme): boolean {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
   root.classList.toggle('dark', theme === 'dark');
@@ -37,16 +42,10 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // <html> is the source of truth: the inline script set it before paint, setTheme changes it.
-  // Never apply the server snapshot ('light') back to the page, or a reload would lose dark mode.
   const theme = useSyncExternalStore(subscribe, readTheme, () => 'light' as Theme);
 
   const setTheme = useCallback((next: Theme) => {
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      /* private mode: the choice lasts for this visit */
-    }
+    storeTheme(next);
     applyTheme(next);
     window.dispatchEvent(new Event(CHANGE_EVENT));
   }, []);

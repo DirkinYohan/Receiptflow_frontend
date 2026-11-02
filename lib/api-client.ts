@@ -83,7 +83,6 @@ export async function apiClient<T>(
     ...(headers as Record<string, string>),
   };
 
-  // Only set application/json if body is not FormData
   if (!(customConfig.body instanceof FormData) && !reqHeaders['Content-Type']) {
     reqHeaders['Content-Type'] = 'application/json';
   }
@@ -91,7 +90,6 @@ export async function apiClient<T>(
   if (!skipAuth) {
     let token = getAccessToken();
 
-    // Check if token is expired before requesting
     if (token && isTokenExpired(token)) {
       if (!isRefreshing) {
         isRefreshing = true;
@@ -120,7 +118,6 @@ export async function apiClient<T>(
       headers: reqHeaders,
     });
   } catch (err: unknown) {
-    // A cancelled request (newer search, closed page) is not a connection error.
     if (err instanceof DOMException && err.name === 'AbortError') throw err;
     const message = translate('api.connection');
     const error: ApiError = {
@@ -130,7 +127,6 @@ export async function apiClient<T>(
     throw error;
   }
 
-  // Handle 401 Unauthorized with token refresh retry
   if (response.status === 401 && !skipAuth) {
     if (!isRefreshing) {
       isRefreshing = true;
@@ -188,7 +184,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
         error.message = typeof data.errors[0] === 'string' ? data.errors[0] : (data.errors[0].message || translate('api.validation'));
       }
 
-      // Collect field errors
       const fieldErrors: Record<string, string> = {};
       Object.entries(data).forEach(([key, val]) => {
         if (key !== 'status' && key !== 'message' && key !== 'detail') {
@@ -214,7 +209,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
-/** Downloads a file from an authenticated endpoint and hands it to the browser. */
 export async function apiDownload(
   endpoint: string,
   params: Record<string, string | number | undefined | null> = {}

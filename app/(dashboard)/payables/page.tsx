@@ -34,7 +34,6 @@ const RECURRING_STYLE: Record<RecurringState, string> = {
   ok: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200',
 };
 
-// Dates without time (YYYY-MM-DD) are read at midday so the local timezone can't shift the day.
 const dayOnly = (value: string) => formatDate(`${value}T12:00:00`);
 
 function dueLabel(item: PayableItem, t: (key: string, params?: Record<string, string | number>) => string) {
@@ -62,7 +61,6 @@ export default function PayablesPage() {
   };
 
   const markPaid = async (item: PayableItem) => {
-    // Optimistic: the bill leaves its group at once and comes back if saving fails.
     const previous = queryClient.getQueryData<PayablesOverview>(qk.documents.payables);
     queryClient.setQueryData<PayablesOverview>(qk.documents.payables, (prev) =>
       prev

@@ -11,7 +11,7 @@ import { documentsService } from '@/services/documents.service';
 import { formatFileSize } from '@/lib/formatters';
 import { useI18n } from '@/providers/I18nProvider';
 
-const MAX_FILES = 20; // matches the backend upload rate limit (20/min)
+const MAX_FILES = 20;
 const MAX_SIZE = 20 * 1024 * 1024;
 const CONCURRENCY = 3;
 const POLL_MS = 2500;
@@ -110,7 +110,6 @@ export function DocumentUploadModal({
     setRunning(true);
     setErrorMessage('');
 
-    // Upload a few at a time so the server and the OCR provider are not flooded.
     const results: { key: string; docId?: number; state: ItemState }[] = [];
     let cursor = 0;
     await Promise.all(
@@ -122,7 +121,6 @@ export function DocumentUploadModal({
       })
     );
 
-    // Documents still being read in the background: poll until they settle.
     let pending = results.filter((r) => r.state === 'processing' && r.docId);
     const started = Date.now();
     while (pending.length && Date.now() - started < POLL_LIMIT_MS) {

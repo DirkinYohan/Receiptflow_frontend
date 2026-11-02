@@ -63,7 +63,6 @@ export default function ExpensesPage() {
     }
   };
 
-  // Totals depend only on the filters, so paging or sorting reuses them instead of asking again.
   const filters = {
     ...(categoryFilter ? { category: Number(categoryFilter) } : {}),
     ...(paymentFilter ? { payment_method: paymentFilter } : {}),
@@ -106,7 +105,6 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -141,7 +139,6 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      {/* Mini Stat Summary */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
@@ -179,7 +176,6 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      {/* Filters bar */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
         <div className="sm:col-span-5 lg:col-span-6">
           <Input
@@ -243,7 +239,6 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      {/* Content / Table */}
       {isLoading ? (
         <div className="py-16">
           <LoadingSpinner size="lg" text={t('expenses.loading')} />
@@ -383,7 +378,6 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      {/* Expense Modal */}
       <ExpenseFormModal
         isOpen={isModalOpen}
         onClose={() => {

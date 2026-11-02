@@ -86,7 +86,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -110,14 +109,12 @@ export default function CategoriesPage() {
 
       <BudgetsPanel />
 
-      {/* Tabs */}
       <Tabs
         tabs={tabs}
         activeTab={scopeFilter}
         onTabChange={(id) => setScopeFilter(id as any)}
       />
 
-      {/* Search */}
       <div className="max-w-md">
         <Input
           placeholder={t('categories.search')}
@@ -127,7 +124,6 @@ export default function CategoriesPage() {
         />
       </div>
 
-      {/* Grid */}
       {isLoading ? (
         <div className="py-16">
           <LoadingSpinner size="lg" text={t('categories.loading')} />
@@ -242,7 +238,6 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* Category Modal */}
       <CategoryFormModal
         isOpen={isModalOpen}
         onClose={() => {

@@ -32,7 +32,6 @@ export default function SettingsPage() {
   const { success: toastSuccess, error: toastError } = useToast();
   const { t } = useI18n();
 
-  // Profile Form state
   const [firstName, setFirstName] = useState(user?.first_name || '');
   const [lastName, setLastName] = useState(user?.last_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -40,7 +39,6 @@ export default function SettingsPage() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [profileError, setProfileError] = useState('');
 
-  // Password Form state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -115,7 +113,6 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 max-w-4xl pb-16">
-      {/* Header */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {t('settings.title')}
@@ -134,7 +131,6 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* Account Status Card */}
       <Card className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -190,7 +186,6 @@ export default function SettingsPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Edit Profile Card */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -242,7 +237,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Change Password Card */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -308,7 +302,6 @@ export default function SettingsPage() {
         </Card>
       </div>
 
-      {/* Account Info Details Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">

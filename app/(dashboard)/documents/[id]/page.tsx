@@ -48,7 +48,6 @@ export default function DocumentDetailPage() {
   const [isCreatingExpense, setIsCreatingExpense] = useState(false);
   const [paying, setPaying] = useState(false);
 
-  // Cached: opening the same document again is instant. While it is being read, it polls itself.
   const documentQuery = useDocument(docId);
   const document = documentQuery.data ?? null;
   const isLoading = documentQuery.isPending;

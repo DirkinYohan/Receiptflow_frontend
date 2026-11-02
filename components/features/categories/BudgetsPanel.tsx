@@ -44,7 +44,6 @@ function BudgetBar({ budget }: { budget: CategoryBudget }) {
   );
 }
 
-/** Compact view for the dashboard: only categories that have a budget. */
 export function BudgetSummary() {
   const { locale, t } = useI18n();
   const { data: budgets = [], isPending } = useBudgets();
@@ -84,7 +83,6 @@ function BudgetRow({
   const { locale, t } = useI18n();
   const { success: toastSuccess, error: toastError } = useToast();
   const queryClient = useQueryClient();
-  // Only this row changes: patch the cached list with the server's answer instead of reloading it.
   const setBudgets = (update: (list: CategoryBudget[]) => CategoryBudget[]) =>
     queryClient.setQueryData<CategoryBudget[]>(qk.budgets.all, (list = []) => update(list));
   const [value, setValue] = useState(budget ? String(Number(budget.monthly_amount)) : '');
@@ -166,7 +164,6 @@ function BudgetRow({
   );
 }
 
-/** Editable list on the categories page: one monthly budget per category. */
 export function BudgetsPanel() {
   const { locale, t } = useI18n();
   const { data: budgets = [] } = useBudgets();

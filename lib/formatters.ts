@@ -43,13 +43,11 @@ export function formatDate(
   return new Intl.DateTimeFormat(activeLocale, defaultOptions).format(date);
 }
 
-/** YYYY-MM-DD in the user's own timezone (toISOString would give the UTC day). */
 export function localDateInput(date: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-/** '2026-08' -> 'ago 2026' / 'Aug 2026' in the active language. */
 export function formatMonth(month: string | null | undefined): string {
   if (!month) return '';
   const [year, monthIndex] = month.split('-').map(Number);

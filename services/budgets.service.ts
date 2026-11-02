@@ -7,7 +7,6 @@ export const budgetsService = {
     return apiClient<ApiResponse<CategoryBudget[]>>('/api/v1/budgets/');
   },
 
-  // Saving a budget for a category that already has one updates it.
   async saveBudget(category: number, monthlyAmount: number): Promise<ApiResponse<CategoryBudget>> {
     return apiClient<ApiResponse<CategoryBudget>>('/api/v1/budgets/', {
       method: 'POST',

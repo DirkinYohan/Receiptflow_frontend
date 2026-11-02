@@ -34,7 +34,6 @@ export default function DashboardPage() {
   const [periodMonths, setPeriodMonths] = useState(6);
   const range = { months: periodMonths };
 
-  // Each block loads on its own: a slow one no longer holds the others back.
   const summaryQuery = useDashboardSummary(range);
   const statsQuery = useDocumentStats();
   const monthlyQuery = useMonthlyExpenses(range);

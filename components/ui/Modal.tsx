@@ -58,13 +58,11 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-zinc-950/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
-      {/* Modal Box */}
       <div
         className={`relative w-full ${sizes[size]} rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800 transition-all transform animate-in fade-in zoom-in-95 duration-200 z-10 overflow-hidden my-8 max-h-[90vh] flex flex-col`}
       >

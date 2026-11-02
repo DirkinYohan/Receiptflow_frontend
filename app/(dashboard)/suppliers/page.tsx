@@ -69,14 +69,12 @@ export default function SuppliersPage() {
   const handleToggleFavorite = async (supplier: Supplier, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Optimistic star; reverted if the server refuses.
     const previous = queryClient.getQueryData<PaginatedResponse<Supplier>>(listKey);
     patchList((rows) => rows.map((s) => (s.id === supplier.id ? { ...s, is_favorite: !supplier.is_favorite } : s)));
     try {
       const res = await suppliersService.toggleFavorite(supplier.id);
       const isFav = res.data?.is_favorite ?? !supplier.is_favorite;
       toastSuccess(isFav ? t('suppliers.favoriteOn') : t('suppliers.favoriteOff'));
-      // Other pages (e.g. the favorites tab) are only marked stale, not refetched now.
       queryClient.invalidateQueries({ queryKey: qk.suppliers.all, refetchType: 'none' });
     } catch {
       queryClient.setQueryData(listKey, previous);
@@ -108,7 +106,6 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -130,7 +127,6 @@ export default function SuppliersPage() {
         </Button>
       </div>
 
-      {/* Tabs */}
       <Tabs
         tabs={tabs}
         activeTab={filterTab}
@@ -140,7 +136,6 @@ export default function SuppliersPage() {
         }}
       />
 
-      {/* Search */}
       <div className="max-w-md">
         <Input
           placeholder={t('suppliers.search')}
@@ -153,7 +148,6 @@ export default function SuppliersPage() {
         />
       </div>
 
-      {/* Content */}
       {isLoading ? (
         <div className="py-16">
           <LoadingSpinner size="lg" text={t('suppliers.loading')} />
@@ -222,7 +216,6 @@ export default function SuppliersPage() {
                     </button>
                   </div>
 
-                  {/* Contact Info */}
                   <div className="mt-4 space-y-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                     {supplier.email && (
                       <p className="flex items-center gap-2 truncate">
@@ -242,7 +235,6 @@ export default function SuppliersPage() {
                   </div>
                 </div>
 
-                {/* Footer with activity and actions */}
                 <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3 text-zinc-400 font-medium dark:text-zinc-500">
                     <span className="inline-flex items-center gap-1">
@@ -286,7 +278,6 @@ export default function SuppliersPage() {
         </div>
       )}
 
-      {/* Supplier Modal */}
       <SupplierFormModal
         isOpen={isModalOpen}
         onClose={() => {

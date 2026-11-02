@@ -37,7 +37,7 @@ export const authService = {
           body: JSON.stringify({ refresh }),
         });
       } catch {
-        // Even if server call fails, local cleanup will occur
+        return;
       }
     }
   },

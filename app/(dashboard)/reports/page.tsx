@@ -30,13 +30,11 @@ const PRESETS: { id: Preset; labelKey: string }[] = [
   { id: 'all', labelKey: 'reports.presetAll' },
 ];
 
-/** Start day of a preset; "all" starts at the user's oldest expense. */
 async function presetStart(preset: Preset, client: QueryClient): Promise<string> {
   const now = new Date();
   if (preset === 'month') return localDateInput(new Date(now.getFullYear(), now.getMonth(), 1));
   if (preset === 'year') return localDateInput(new Date(now.getFullYear(), 0, 1));
   if (preset === 'quarter') return localDateInput(new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()));
-  // Same parameters as any expenses list, so it shares the cache (and its invalidation).
   const oldestParams = { ordering: 'incurred_at', page_size: 1 };
   const oldest = await client.fetchQuery({
     queryKey: qk.expenses.list(oldestParams),
@@ -65,8 +63,6 @@ export default function ReportsPage() {
     setEndDate(localDateInput());
   };
 
-  // Plain days: the server reads them as whole local days, so today's expenses are included.
-  // Same range = same cache entry; a new range keeps the old numbers visible until it arrives.
   const range = { start_date: startDate, end_date: endDate };
   const summaryQuery = useDashboardSummary(range);
   const monthlyQuery = useMonthlyExpenses(range);
@@ -101,7 +97,6 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-8 pb-16">
-      {/* Header & Date Range Filter */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -184,7 +179,6 @@ export default function ReportsPage() {
         />
       ) : (
         <div className="space-y-8">
-          {/* Key Period Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-4">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
@@ -229,7 +223,6 @@ export default function ReportsPage() {
             </Card>
           </div>
 
-          {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7">
               <Card>
@@ -254,7 +247,6 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Top Suppliers Breakdown */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">

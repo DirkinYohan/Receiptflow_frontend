@@ -1,9 +1,5 @@
 import { Locale, messages } from './messages';
 
-/**
- * Traducciones fuera de React (cliente de la API, avisos globales).
- * I18nProvider mantiene aquí el idioma activo.
- */
 let activeLocale: Locale = 'es';
 
 export function setTranslateLocale(locale: Locale) {

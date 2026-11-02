@@ -7,11 +7,6 @@ type CategoryEntry = {
   description: { es: string; en: string };
 };
 
-/**
- * Categorías del sistema (`scope = 'system'`).
- * En la base de datos se guardan con el nombre en inglés
- * (ver `seed_categories.py` en el backend), por eso se traducen aquí.
- */
 const SYSTEM_CATEGORIES: CategoryEntry[] = [
   {
     slug: 'food',
@@ -113,15 +108,6 @@ export type CategoryLike = {
   scope?: string | null;
 };
 
-/**
- * Devuelve el nombre de la categoría en el idioma activo.
- *
- * - Categorías del sistema: se traducen según `locale`.
- * - Categorías propias del usuario: se devuelven tal cual.
- *
- * Acepta un objeto `Category` o directamente un `category_name` (string),
- * que es como llegan en gastos, pagos y presupuestos.
- */
 export function localizeCategoryName(
   category: CategoryLike | string | null | undefined,
   locale: Locale
@@ -137,7 +123,6 @@ export function localizeCategoryName(
   const rawName = category.name ?? '';
   if (!rawName) return '';
 
-  // Si sabemos con certeza que es una categoría del usuario, se respeta tal cual.
   const scopeKnown = category.is_system !== undefined || category.scope != null;
   const isSystem = category.is_system ?? category.scope === 'system';
   if (scopeKnown && !isSystem) return rawName;
@@ -149,7 +134,6 @@ export function localizeCategoryName(
   return entry ? entry[locale] : rawName;
 }
 
-/** Description in the active language; user categories keep what the user wrote. */
 export function localizeCategoryDescription(
   category: CategoryLike & { description?: string | null },
   locale: Locale

@@ -31,7 +31,6 @@ export function ExpenseFormModal({
   const { success: toastSuccess } = useToast();
   const { locale, t } = useI18n();
 
-  // Shared, cached catalogs: opening the form again does not hit the server.
   const { data: categories = [] } = useAvailableCategories();
   const { data: suppliers = [] } = useSupplierOptions(isOpen);
   const queryClient = useQueryClient();

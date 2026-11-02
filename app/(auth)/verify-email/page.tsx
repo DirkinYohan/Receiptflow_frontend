@@ -24,8 +24,6 @@ function VerifyEmailContent() {
   const [errorMessage, setErrorMessage] = useState('');
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
 
-  // Mantiene el traductor al día sin cambiar la identidad del callback,
-  // para que el efecto de auto-verificación no se repita al cambiar de idioma.
   const tRef = useRef(t);
   useEffect(() => {
     tRef.current = t;
@@ -46,7 +44,6 @@ function VerifyEmailContent() {
   }, []);
 
   useEffect(() => {
-    // If both email and token are in URL, auto verify
     if (initialEmail && initialToken) {
       handleAutoVerify(initialEmail, initialToken);
     }

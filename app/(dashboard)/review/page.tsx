@@ -287,7 +287,6 @@ export default function ReviewPage() {
   const backToList = () => setSelectedId(null);
 
   const removeCurrent = () => {
-    // Drop it from the cached queue at once; related lists and counters refresh in the background.
     queryClient.setQueryData<ReviewQueueItem[]>(qk.documents.review, (list = []) =>
       list.filter((item) => item.id !== selectedId)
     );
@@ -301,7 +300,6 @@ export default function ReviewPage() {
     try {
       await documentsService.retryProcessing(current.id);
       toastSuccess(t('review.reprocessed'));
-      // The new reading may resolve the doubts (it leaves the queue) or bring new ones.
       await invalidateAfter(queryClient, 'document');
       backToList();
     } catch (err) {

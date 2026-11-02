@@ -1,7 +1,3 @@
-/**
- * Cache keys. Every key starts with its domain so a change can invalidate a whole
- * domain (['expenses']) or just one entry (['expenses', 'detail', 7]).
- */
 export const qk = {
   documents: {
     all: ['documents'] as const,

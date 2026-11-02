@@ -85,7 +85,6 @@ export default function ExpenseDetailPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -131,7 +130,6 @@ export default function ExpenseDetailPage() {
         </div>
       </div>
 
-      {/* Cards breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
@@ -164,7 +162,6 @@ export default function ExpenseDetailPage() {
         </Card>
       </div>
 
-      {/* Expense info & Attached Document */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7 space-y-6">
           <Card>
@@ -255,7 +252,6 @@ export default function ExpenseDetailPage() {
         <DocumentBreakdown lineItems={lineItems} currency={expense.currency} />
       )}
 
-      {/* Edit Modal */}
       <ExpenseFormModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

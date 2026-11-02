@@ -50,8 +50,6 @@ function DocumentsPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [actionInProgressId, setActionInProgressId] = useState<number | null>(null);
 
-  // Server-side pagination and filters; the key changes with them, older answers are discarded
-  // and the previous request is cancelled, so a slow response never overwrites a newer search.
   const params = {
     page: currentPage,
     page_size: 15,
@@ -75,7 +73,6 @@ function DocumentsPage() {
     );
 
   const togglePaid = async (doc: Document, paid: boolean) => {
-    // Optimistic: the switch moves at once and goes back if the server says no.
     const previous = queryClient.getQueryData<PaginatedResponse<Document>>(listKey);
     patchList((rows) => rows.map((item) => (item.id === doc.id ? { ...item, is_paid: paid } : item)));
     setActionInProgressId(doc.id);

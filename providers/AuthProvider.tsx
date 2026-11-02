@@ -41,11 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const profileRequest = useRef<Promise<void> | null>(null);
 
-  // Cached data belongs to one account: drop all of it whenever the account changes or ends.
   const resetCache = useCallback(() => queryClient.clear(), [queryClient]);
 
   const fetchCurrentUser = useCallback(() => {
-    // React runs mount effects twice in development; share the in-flight request.
     if (profileRequest.current) return profileRequest.current;
     profileRequest.current = (async () => {
       const token = getAccessToken();
@@ -88,7 +86,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [fetchCurrentUser, resetCache, router, toastInfo]);
 
-  // Route protection
   useEffect(() => {
     if (isLoading) return;
 
@@ -124,8 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await authService.register(payload);
 
-      // Si la cuenta requiere verificación de correo, NO se inicia sesión:
-      // el usuario debe confirmar su correo antes de entrar a la aplicación.
       if (res.requires_email_verification || !res.tokens) {
         router.push(`/verify-email?email=${encodeURIComponent(payload.email)}`);
         return;

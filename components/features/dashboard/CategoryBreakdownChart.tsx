@@ -78,7 +78,6 @@ export function CategoryBreakdownChart({
               </div>
             </div>
 
-            {/* Progress Bar */}
             <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"

@@ -16,12 +16,6 @@ import { DashboardSummary } from '@/types/report';
 const STILL_READING = new Set(['pending', 'processing']);
 const POLL_MS = 3500;
 
-/**
- * Abort signal for list requests that is cancelled only when the filters change
- * (a newer search replaces the older one), never when the page unmounts: leaving a
- * module lets its request finish and land in the cache for the next visit.
- * (TanStack's own signal aborts on unmount, which also doubles requests under React StrictMode.)
- */
 function useSupersedingSignal(params: object) {
   const key = JSON.stringify(params);
   const controller = useMemo(() => new AbortController(), [key]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -33,16 +27,13 @@ function useSupersedingSignal(params: object) {
   return controller.signal;
 }
 
-/* ------------------------------------------------------------ documents */
 
 export function useDocuments(params: DocumentQueryParams) {
   const signal = useSupersedingSignal(params);
   return useQuery({
     queryKey: qk.documents.list(params),
     queryFn: () => documentsService.getDocuments(params, signal),
-    // Paging or filtering keeps the current rows on screen until the next page arrives.
     placeholderData: keepPreviousData,
-    // Only while a document is being read: poll until it finishes.
     refetchInterval: (query) =>
       query.state.data?.results?.some((doc: Document) => STILL_READING.has(doc.status)) ? POLL_MS : false,
   });
@@ -78,7 +69,6 @@ export function usePayables() {
   });
 }
 
-/* ------------------------------------------------------------- expenses */
 
 export function useExpenses(params: ExpenseQueryParams) {
   const signal = useSupersedingSignal(params);
@@ -113,7 +103,6 @@ export function useRecurringExpenses() {
   });
 }
 
-/* --------------------------------------------------- catalogs (rarely change) */
 
 export function useAvailableCategories() {
   return useQuery({
@@ -158,7 +147,6 @@ export function useSupplierOptions(enabled = true) {
   });
 }
 
-/* ----------------------------------------------------- dashboard / reports */
 
 export function useDashboardSummary(params: DateRangeParams) {
   return useQuery<DashboardSummary | null>({

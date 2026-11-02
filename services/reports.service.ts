@@ -17,7 +17,6 @@ export interface DateRangeParams {
 }
 
 export const reportsService = {
-  // Dashboard Analytics
   async getDashboardSummary(
     params: DateRangeParams = {}
   ): Promise<ApiResponse<DashboardSummary>> {

@@ -82,7 +82,6 @@ export default function RegisterPage() {
 
   return (
     <div className="space-y-6">
-      {/* Mobile brand header */}
       <div className="lg:hidden flex items-center gap-2.5 mb-8">
         <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
           <Receipt className="w-5 h-5" />

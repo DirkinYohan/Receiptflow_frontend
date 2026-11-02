@@ -23,7 +23,8 @@ import { usersService } from '@/services/users.service';
 import { useToast } from '@/hooks/useToast';
 import { useI18n } from '@/providers/I18nProvider';
 import { LanguageSelector } from '@/components/features/i18n/LanguageSelector';
-import { formatDateTime } from '@/lib/formatters';
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle';
+import { formatDate, formatDateTime } from '@/lib/formatters';
 import { ApiError } from '@/types/api';
 
 export default function SettingsPage() {
@@ -69,11 +70,11 @@ export default function SettingsPage() {
       if (res.data) {
         updateUserData(res.data);
       }
-      toastSuccess('Perfil actualizado correctamente.');
+      toastSuccess(t('settings.profileOk'));
       refreshUser();
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setProfileError(apiErr.message || 'Error al actualizar el perfil.');
+      setProfileError(apiErr.message || t('settings.profileError'));
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -85,7 +86,7 @@ export default function SettingsPage() {
     setPasswordSuccess(false);
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('Las nuevas contraseñas no coinciden.');
+      setPasswordError(t('settings.passwordMismatch'));
       return;
     }
 
@@ -125,9 +126,11 @@ export default function SettingsPage() {
       </div>
 
       <Card className="p-6">
-        <h3 className="text-sm font-semibold text-stone-900">{t('settings.language')}</h3>
-        <div className="mt-3">
+        <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('settings.language')}</h3>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <LanguageSelector />
+          <ThemeToggle />
+          <span className="text-sm text-stone-500 dark:text-stone-400">{t('theme.hint')}</span>
         </div>
       </Card>
 
@@ -151,7 +154,7 @@ export default function SettingsPage() {
               <label
                 htmlFor="avatar_input"
                 className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 flex items-center justify-center cursor-pointer shadow-xs hover:scale-110 transition-transform"
-                title="Cambiar foto de perfil"
+                title={t('settings.changePhoto')}
               >
                 <Camera className="w-3.5 h-3.5" />
               </label>
@@ -170,17 +173,17 @@ export default function SettingsPage() {
                   {user.full_name || user.email}
                 </h3>
                 <Badge variant={user.is_email_verified ? 'success' : 'warning'} size="sm">
-                  {user.is_email_verified ? 'Verificado' : 'Pendiente Verificación'}
+                  {user.is_email_verified ? t('settings.verified') : t('settings.unverified')}
                 </Badge>
               </div>
-              <p className="text-xs text-zinc-400 font-mono mt-0.5">{user.email}</p>
+              <p className="text-xs text-zinc-400 font-mono mt-0.5 dark:text-zinc-500">{user.email}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-zinc-500 border-t sm:border-t-0 pt-3 sm:pt-0">
+          <div className="flex items-center gap-3 text-xs text-zinc-500 border-t sm:border-t-0 pt-3 sm:pt-0 dark:text-zinc-400">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-zinc-400" />
-              <span>Miembro desde {formatDateTime(user.date_joined).split(',')[0]}</span>
+              <Calendar className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+              <span>{t('settings.memberSince', { date: formatDate(user.date_joined) })}</span>
             </div>
           </div>
         </div>
@@ -191,8 +194,8 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <UserIcon className="w-4 h-4 text-indigo-600" />
-              <span>Información Personal</span>
+              <UserIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>{t('settings.personalInfo')}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -204,7 +207,7 @@ export default function SettingsPage() {
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <Input
-                label="Nombre"
+                label={t('settings.firstName')}
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -212,7 +215,7 @@ export default function SettingsPage() {
               />
 
               <Input
-                label="Apellido"
+                label={t('settings.lastName')}
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -220,11 +223,11 @@ export default function SettingsPage() {
               />
 
               <Input
-                label="Correo electrónico"
+                label={t('settings.email')}
                 type="email"
                 disabled
                 value={user.email}
-                helperText="El correo no se puede modificar directamente."
+                helperText={t('settings.emailLocked')}
               />
 
               <Button
@@ -233,7 +236,7 @@ export default function SettingsPage() {
                 isLoading={isUpdatingProfile}
                 leftIcon={<Save className="w-4 h-4" />}
               >
-                Guardar Perfil
+                {t('settings.saveProfile')}
               </Button>
             </form>
           </CardContent>
@@ -243,8 +246,8 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Lock className="w-4 h-4 text-indigo-600" />
-              <span>Seguridad y Contraseña</span>
+              <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>{t('settings.security')}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -256,13 +259,13 @@ export default function SettingsPage() {
 
             {passwordSuccess && (
               <Alert type="success" className="mb-4">
-                Tu contraseña ha sido actualizada.
+                {t('settings.passwordUpdated')}
               </Alert>
             )}
 
             <form onSubmit={handleChangePassword} className="space-y-4">
               <Input
-                label="Contraseña actual"
+                label={t('settings.currentPassword')}
                 type="password"
                 required
                 placeholder="••••••••"
@@ -272,20 +275,20 @@ export default function SettingsPage() {
               />
 
               <Input
-                label="Nueva contraseña"
+                label={t('settings.newPassword')}
                 type="password"
                 required
-                placeholder="Mínimo 8 caracteres"
+                placeholder={t('settings.newPasswordPlaceholder')}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={isChangingPassword}
               />
 
               <Input
-                label="Confirmar nueva contraseña"
+                label={t('settings.confirmPassword')}
                 type="password"
                 required
-                placeholder="Repite la nueva contraseña"
+                placeholder={t('settings.confirmPasswordPlaceholder')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isChangingPassword}
@@ -298,7 +301,7 @@ export default function SettingsPage() {
                 isLoading={isChangingPassword}
                 leftIcon={<KeyRound className="w-4 h-4" />}
               >
-                Actualizar Contraseña
+                {t('settings.updatePassword')}
               </Button>
             </form>
           </CardContent>
@@ -309,32 +312,32 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="w-4 h-4 text-indigo-600" />
-            <span>Detalles de la Cuenta y Auditoría</span>
+            <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <span>{t('settings.accountDetails')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs sm:text-sm">
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500">ID de Usuario</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.userId')}</span>
             <span className="font-mono font-medium">{user.id}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500">Nombre de Usuario</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.username')}</span>
             <span className="font-mono font-medium">{user.username}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500">Estado de la cuenta</span>
-            <span className="text-emerald-600 font-semibold">
-              {user.is_active ? 'Activa y autorizada' : 'Desactivada'}
+            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.accountStatus')}</span>
+            <span className="text-emerald-600 font-semibold dark:text-emerald-400">
+              {user.is_active ? t('settings.active') : t('settings.inactive')}
             </span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500">Última sesión registrada</span>
-            <span className="text-zinc-500">{formatDateTime(user.last_login)}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.lastLogin')}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{formatDateTime(user.last_login)}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500">Última actividad</span>
-            <span className="text-zinc-500">{formatDateTime(user.last_activity_at)}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.lastActivity')}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{formatDateTime(user.last_activity_at)}</span>
           </div>
         </CardContent>
       </Card>

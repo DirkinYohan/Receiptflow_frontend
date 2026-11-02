@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { CheckCircle2, Mail, ArrowLeft, RefreshCw } from 'lucide-react';
 import { authService } from '@/services/auth.service';
 import { ApiError } from '@/types/api';
@@ -18,8 +19,7 @@ function VerifyEmailContent() {
   const initialToken = searchParams.get('token') || '';
 
   const [email, setEmail] = useState(initialEmail);
-  const [token, setToken] = useState(initialToken);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(initialEmail && initialToken));
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
@@ -29,32 +29,22 @@ function VerifyEmailContent() {
     tRef.current = t;
   }, [t]);
 
-  const handleAutoVerify = useCallback(async (e: string, tk: string) => {
-    setIsLoading(true);
-    setErrorMessage('');
-    try {
-      await authService.verifyEmail({ email: e, token: tk });
-      setIsSuccess(true);
-    } catch (err: unknown) {
-      const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || tRef.current('auth.verifyInvalidToken'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (initialEmail && initialToken) {
-      handleAutoVerify(initialEmail, initialToken);
-    }
-  }, [initialEmail, initialToken, handleAutoVerify]);
+    if (!initialEmail || !initialToken) return;
+    authService
+      .verifyEmail({ email: initialEmail, token: initialToken })
+      .then(() => setIsSuccess(true))
+      .catch((err: unknown) => {
+        const apiErr = err as ApiError;
+        setErrorMessage(
+          apiErr.statusCode === 400 || !apiErr.message ? tRef.current('auth.verifyInvalidToken') : apiErr.message,
+        );
+      })
+      .finally(() => setIsLoading(false));
+  }, [initialEmail, initialToken]);
 
-  const handleManualSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    handleAutoVerify(email, token);
-  };
-
-  const handleResend = async () => {
+  const handleResend = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!email) {
       setErrorMessage(t('auth.verifyEnterEmail'));
       return;
@@ -88,6 +78,10 @@ function VerifyEmailContent() {
         </Link>
       </div>
     );
+  }
+
+  if (isLoading) {
+    return <LoadingState text={t('auth.verifying')} />;
   }
 
   return (
@@ -127,7 +121,8 @@ function VerifyEmailContent() {
         </Alert>
       )}
 
-      <form onSubmit={handleManualSubmit} className="space-y-4">
+      <form onSubmit={handleResend} className="space-y-4">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('auth.verifyResendHint')}</p>
         <Input
           label={t('auth.emailLabel')}
           type="email"
@@ -136,38 +131,18 @@ function VerifyEmailContent() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           startIcon={<Mail className="w-4 h-4" />}
-          disabled={isLoading}
+          disabled={resendStatus === 'loading'}
         />
-
-        <Input
-          label={t('auth.verifyToken')}
-          type="text"
-          required
-          placeholder={t('auth.verifyTokenPlaceholder')}
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          disabled={isLoading}
-        />
-
         <Button
           type="submit"
-          className="w-full mt-2"
-          isLoading={isLoading}
+          variant="outline"
+          className="w-full"
+          isLoading={resendStatus === 'loading'}
         >
-          {t('auth.verifyButton')}
+          <RefreshCw className="w-4 h-4" />
+          {t('auth.verifyResendButton')}
         </Button>
       </form>
-
-      <div className="pt-2 flex flex-col items-center gap-2 border-t border-zinc-200 dark:border-zinc-800">
-        <button
-          onClick={handleResend}
-          disabled={resendStatus === 'loading'}
-          className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 hover:underline flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${resendStatus === 'loading' ? 'animate-spin' : ''}`} />
-          <span>{t('auth.verifyResendCta')}</span>
-        </button>
-      </div>
     </div>
   );
 }

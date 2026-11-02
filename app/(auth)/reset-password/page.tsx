@@ -78,7 +78,7 @@ function ResetPasswordForm() {
       <div>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 mb-6 transition-colors dark:text-zinc-400"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>{t('auth.backToLogin')}</span>
@@ -157,7 +157,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   const { t } = useI18n();
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-zinc-400">{t('common.loading')}</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-sm text-zinc-400 dark:text-zinc-500">{t('common.loading')}</div>}>
       <ResetPasswordForm />
     </Suspense>
   );

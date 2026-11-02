@@ -43,7 +43,7 @@ export default function LoginPage() {
           <Receipt className="w-5 h-5" />
         </div>
         <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Receipt<span className="text-indigo-600">Flow</span>
+          Receipt<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
         </span>
       </div>
 
@@ -112,7 +112,7 @@ export default function LoginPage() {
           {t('auth.noAccount')}{' '}
           <Link
             href="/register"
-            className="font-semibold text-emerald-800 hover:underline"
+            className="font-semibold text-emerald-800 hover:underline dark:text-emerald-200"
           >
             {t('auth.register')}
           </Link>

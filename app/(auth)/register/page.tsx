@@ -88,7 +88,7 @@ export default function RegisterPage() {
           <Receipt className="w-5 h-5" />
         </div>
         <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Receipt<span className="text-indigo-600">Flow</span>
+          Receipt<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
         </span>
       </div>
 
@@ -183,7 +183,7 @@ export default function RegisterPage() {
             required
             checked={formData.accept_terms}
             onChange={handleChange}
-            className="mt-1 h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            className="mt-1 h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer dark:text-indigo-400"
             disabled={isLoading}
           />
           <label

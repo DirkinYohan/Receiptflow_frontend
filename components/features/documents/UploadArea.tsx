@@ -33,7 +33,7 @@ export function UploadArea({
             pick(event.dataTransfer.files);
           }}
           onClick={() => inputRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-300"
         >
           <Plus className="h-4 w-4" aria-hidden />
           {t('upload.addMore')}
@@ -48,12 +48,12 @@ export function UploadArea({
             pick(event.dataTransfer.files);
           }}
           onClick={() => inputRef.current?.click()}
-          className="flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-6 py-12 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:opacity-60"
+          className="flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-6 py-12 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800/60"
         >
-          <UploadCloud className="mb-3 h-8 w-8 text-stone-400" aria-hidden />
-          <p className="text-sm font-semibold text-stone-900">{t('upload.drop')}</p>
-          <p className="mt-1 text-sm text-stone-500">{t('upload.or')}</p>
-          <p className="mt-3 text-xs text-stone-400">{t('upload.types')}</p>
+          <UploadCloud className="mb-3 h-8 w-8 text-stone-400 dark:text-stone-500" aria-hidden />
+          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('upload.drop')}</p>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t('upload.or')}</p>
+          <p className="mt-3 text-xs text-stone-400 dark:text-stone-500">{t('upload.types')}</p>
         </button>
       )}
       <input

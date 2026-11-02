@@ -1,6 +1,7 @@
 'use client';
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FileText, Search, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +18,10 @@ import { documentsService } from '@/services/documents.service';
 import { Document } from '@/types/document';
 import { useToast } from '@/hooks/useToast';
 import { useDebounce } from '@/hooks/useDebounce';
-import { usePolling } from '@/hooks/usePolling';
+import { useDocuments } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
+import { PaginatedResponse } from '@/types/api';
 import { useI18n } from '@/providers/I18nProvider';
 import { ApiError } from '@/types/api';
 
@@ -35,9 +39,7 @@ function DocumentsPage() {
   const { t } = useI18n();
   const { success: toastSuccess, error: toastError } = useToast();
 
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
   const [typeFilter, setTypeFilter] = useState('');
@@ -45,50 +47,44 @@ function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 400);
   const [ordering, setOrdering] = useState('-created_at');
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [actionInProgressId, setActionInProgressId] = useState<number | null>(null);
 
-  const fetchDocuments = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
-    try {
-      const res = await documentsService.getDocuments({
-        page: currentPage,
-        page_size: 15,
-        ordering,
-        ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
-        ...(typeFilter ? { document_type: typeFilter } : {}),
-        ...(paidFilter !== '' ? { is_paid: paidFilter === 'true' } : {}),
-        ...(debouncedSearch ? { search: debouncedSearch } : {}),
-      });
-      setDocuments(res.results || []);
-      setTotalCount(res.count || 0);
-      setTotalPages(res.total_pages || 1);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, statusFilter, typeFilter, paidFilter, debouncedSearch, ordering]);
+  // Server-side pagination and filters; the key changes with them, older answers are discarded
+  // and the previous request is cancelled, so a slow response never overwrites a newer search.
+  const params = {
+    page: currentPage,
+    page_size: 15,
+    ordering,
+    ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+    ...(typeFilter ? { document_type: typeFilter } : {}),
+    ...(paidFilter !== '' ? { is_paid: paidFilter === 'true' } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  };
+  const listKey = qk.documents.list(params);
+  const documentsQuery = useDocuments(params);
+  const documents = documentsQuery.data?.results ?? [];
+  const totalCount = documentsQuery.data?.count ?? 0;
+  const totalPages = documentsQuery.data?.total_pages ?? 1;
+  const isLoading = documentsQuery.isPending;
+  const hasError = documentsQuery.isError && !documentsQuery.data;
 
-  useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
-
-  const hasPending = documents.some((doc) => doc.status === 'processing' || doc.status === 'pending');
-  usePolling(fetchDocuments, hasPending ? 3500 : null, hasPending);
+  const patchList = (update: (rows: Document[]) => Document[]) =>
+    queryClient.setQueryData<PaginatedResponse<Document>>(listKey, (page) =>
+      page ? { ...page, results: update(page.results ?? []) } : page
+    );
 
   const togglePaid = async (doc: Document, paid: boolean) => {
-    const previous = documents;
-    setDocuments((items) => items.map((item) => (item.id === doc.id ? { ...item, is_paid: paid } : item)));
+    // Optimistic: the switch moves at once and goes back if the server says no.
+    const previous = queryClient.getQueryData<PaginatedResponse<Document>>(listKey);
+    patchList((rows) => rows.map((item) => (item.id === doc.id ? { ...item, is_paid: paid } : item)));
     setActionInProgressId(doc.id);
     try {
       await documentsService.updateDocument(doc.id, { is_paid: paid });
       toastSuccess(paid ? t('payment.savedPaid') : t('payment.savedUnpaid'));
+      invalidateAfter(queryClient, 'documentPaid');
     } catch {
-      setDocuments(previous);
+      queryClient.setQueryData(listKey, previous);
       toastError(t('payment.saveError'));
     } finally {
       setActionInProgressId(null);
@@ -100,7 +96,7 @@ function DocumentsPage() {
     try {
       await documentsService.retryProcessing(docId);
       toastSuccess(t('documents.reprocessOk'));
-      fetchDocuments();
+      invalidateAfter(queryClient, 'document');
     } catch (err) {
       toastError((err as ApiError).message || t('documents.reprocessError'));
     } finally {
@@ -113,8 +109,10 @@ function DocumentsPage() {
     setActionInProgressId(doc.id);
     try {
       await documentsService.deleteDocument(doc.id);
+      patchList((rows) => rows.filter((item) => item.id !== doc.id));
+      queryClient.removeQueries({ queryKey: qk.documents.detail(doc.id) });
       toastSuccess(t('documents.deleted'));
-      fetchDocuments();
+      invalidateAfter(queryClient, 'document');
     } catch {
       toastError(t('documents.deleteError'));
     } finally {
@@ -135,8 +133,8 @@ function DocumentsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-900">{t('documents.title')}</h2>
-          <p className="mt-1 text-sm text-stone-500">{t('documents.subtitle')}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">{t('documents.title')}</h2>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t('documents.subtitle')}</p>
         </div>
         <Button onClick={() => setIsUploadModalOpen(true)} leftIcon={<Upload className="h-4 w-4" />}>
           {t('common.upload')}
@@ -217,15 +215,15 @@ function DocumentsPage() {
 
       {isLoading ? (
         <div className="grid gap-3 md:hidden">
-          <div className="h-28 animate-pulse rounded-2xl bg-white" />
-          <div className="h-28 animate-pulse rounded-2xl bg-white" />
+          <div className="h-28 animate-pulse rounded-2xl bg-white dark:bg-stone-900" />
+          <div className="h-28 animate-pulse rounded-2xl bg-white dark:bg-stone-900" />
         </div>
       ) : null}
 
       {isLoading ? (
-        <div className="hidden h-64 animate-pulse rounded-2xl bg-white md:block" />
+        <div className="hidden h-64 animate-pulse rounded-2xl bg-white md:block dark:bg-stone-900" />
       ) : hasError ? (
-        <ErrorState title={t('common.errorTitle')} message={t('documents.loadError')} onRetry={fetchDocuments} />
+        <ErrorState title={t('common.errorTitle')} message={t('documents.loadError')} onRetry={() => documentsQuery.refetch()} />
       ) : documents.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -252,7 +250,7 @@ function DocumentsPage() {
               />
             ))}
           </div>
-          <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:block">
+          <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm md:block dark:border-stone-800 dark:bg-stone-900">
             <DocumentTable
               documents={documents}
               busyId={actionInProgressId}
@@ -284,7 +282,7 @@ function DocumentsPage() {
       <DocumentUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onSuccess={fetchDocuments}
+        onSuccess={() => invalidateAfter(queryClient, 'document')}
       />
     </div>
   );

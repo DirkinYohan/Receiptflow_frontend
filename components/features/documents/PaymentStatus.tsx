@@ -31,8 +31,8 @@ export function PaymentStatus({
       }}
       className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 disabled:opacity-60 ${
         paid
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-          : 'border-stone-200 bg-white text-stone-700'
+          ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
+          : 'border-stone-200 bg-white text-stone-700 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300'
       }`}
     >
       {paid ? (

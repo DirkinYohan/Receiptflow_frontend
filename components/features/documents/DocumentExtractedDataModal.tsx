@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -8,8 +8,8 @@ import { Select } from '@/components/ui/Select';
 import { Alert } from '@/components/ui/Alert';
 import { DocumentDetail, DocumentUpdateExtractedDataPayload } from '@/types/document';
 import { documentsService } from '@/services/documents.service';
-import { categoriesService } from '@/services/categories.service';
-import { AvailableCategory } from '@/types/category';
+import { useAvailableCategories } from '@/hooks/queries';
+import { localizeCategoryName } from '@/lib/i18n/categoryNames';
 import { useToast } from '@/hooks/useToast';
 import { useI18n } from '@/providers/I18nProvider';
 import { Save } from 'lucide-react';
@@ -27,7 +27,7 @@ export function DocumentExtractedDataModal({
   onSuccess: (updated: DocumentDetail) => void;
 }) {
   const { success: toastSuccess } = useToast();
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
 
   const [formData, setFormData] = useState({
     title: document.title || '',
@@ -45,12 +45,7 @@ export function DocumentExtractedDataModal({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<AvailableCategory[]>([]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    categoriesService.getAvailableCategories().then((res) => setCategories(res.data ?? []));
-  }, [isOpen]);
+  const { data: categories = [] } = useAvailableCategories();
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -139,7 +134,7 @@ export function DocumentExtractedDataModal({
             value={formData.category_id}
             onChange={handleChange}
             placeholder="—"
-            options={categories.map((category) => ({ value: String(category.id), label: category.name }))}
+            options={categories.map((category) => ({ value: String(category.id), label: localizeCategoryName(category, locale) }))}
             helperText={t('edit.categoryHint')}
             disabled={isLoading}
           />
@@ -191,10 +186,10 @@ export function DocumentExtractedDataModal({
             value={formData.currency}
             onChange={handleChange}
             options={[
-              { value: 'COP', label: 'COP - Peso Colombiano' },
-              { value: 'MXN', label: 'MXN - Peso Mexicano' },
-              { value: 'USD', label: 'USD - Dólar Estadounidense' },
-              { value: 'EUR', label: 'EUR - Euro' },
+              { value: 'COP', label: t('currency.COP') },
+              { value: 'MXN', label: t('currency.MXN') },
+              { value: 'USD', label: t('currency.USD') },
+              { value: 'EUR', label: t('currency.EUR') },
             ]}
             disabled={isLoading}
           />

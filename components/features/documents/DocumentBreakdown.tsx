@@ -36,7 +36,7 @@ export function DocumentBreakdown({
 
   return (
     <div className="space-y-2">
-      {classLabel && <p className="text-sm text-stone-500">{classLabel}</p>}
+      {classLabel && <p className="text-sm text-stone-500 dark:text-stone-400">{classLabel}</p>}
         {printedSections.map((section, sectionIndex) => {
           const columns = section.columns?.length
             ? section.columns
@@ -44,12 +44,12 @@ export function DocumentBreakdown({
           return (
             <div key={`${section.name || 'seccion'}-${sectionIndex}`} className="overflow-x-auto border-b border-zinc-100 dark:border-zinc-800">
               {section.name && (
-                <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   {section.name}
                 </p>
               )}
               <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 font-semibold uppercase tracking-wider text-[11px]">
+                <thead className="bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 font-semibold uppercase tracking-wider text-[11px] dark:text-zinc-400">
                   <tr>
                     {columns.map((column) => (
                       <th key={column} className="py-2.5 px-4">{column}</th>
@@ -78,7 +78,7 @@ export function DocumentBreakdown({
         {lineItems.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 font-semibold uppercase tracking-wider text-[11px]">
+              <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 font-semibold uppercase tracking-wider text-[11px] dark:text-zinc-400">
                 <tr>
                   <th className="py-2.5 px-4 w-12">#</th>
                   <th className="py-2.5 px-4">{t('detail.description')}</th>
@@ -91,7 +91,7 @@ export function DocumentBreakdown({
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
                 {lineItems.map((item, idx) => (
                   <tr key={item.id || idx}>
-                    <td className="py-3 px-4 text-zinc-400">{item.sequence || idx + 1}</td>
+                    <td className="py-3 px-4 text-zinc-400 dark:text-zinc-500">{item.sequence || idx + 1}</td>
                     <td className="py-3 px-4 font-medium text-zinc-900 dark:text-zinc-100">
                       {item.description}
                     </td>
@@ -123,7 +123,7 @@ export function DocumentBreakdown({
         )}
 
         {printedSections.length === 0 && lineItems.length === 0 && (
-          <div className="p-8 text-center text-xs text-zinc-400">
+          <div className="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500">
             {t('detail.noTable')}
           </div>
         )}

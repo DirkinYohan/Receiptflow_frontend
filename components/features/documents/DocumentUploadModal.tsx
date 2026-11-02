@@ -29,11 +29,11 @@ interface UploadItem {
 const SETTLED: ItemState[] = ['completed', 'review_required', 'failed', 'error'];
 
 function StateIcon({ state }: { state: ItemState }) {
-  if (state === 'completed') return <CheckCircle2 className="h-4 w-4 text-emerald-700" aria-hidden />;
-  if (state === 'review_required') return <AlertTriangle className="h-4 w-4 text-orange-600" aria-hidden />;
-  if (state === 'failed' || state === 'error') return <XCircle className="h-4 w-4 text-red-600" aria-hidden />;
-  if (state === 'queued') return <FileText className="h-4 w-4 text-stone-400" aria-hidden />;
-  return <Loader2 className="h-4 w-4 animate-spin text-stone-500" aria-hidden />;
+  if (state === 'completed') return <CheckCircle2 className="h-4 w-4 text-emerald-700 dark:text-emerald-300" aria-hidden />;
+  if (state === 'review_required') return <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" aria-hidden />;
+  if (state === 'failed' || state === 'error') return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" aria-hidden />;
+  if (state === 'queued') return <FileText className="h-4 w-4 text-stone-400 dark:text-stone-500" aria-hidden />;
+  return <Loader2 className="h-4 w-4 animate-spin text-stone-500 dark:text-stone-400" aria-hidden />;
 }
 
 export function DocumentUploadModal({
@@ -165,14 +165,14 @@ export function DocumentUploadModal({
           <UploadArea onFiles={addFiles} disabled={running} />
         ) : (
           <>
-            <ul className="max-h-80 divide-y divide-stone-100 overflow-y-auto rounded-2xl border border-stone-200">
+            <ul className="max-h-80 divide-y divide-stone-100 overflow-y-auto rounded-2xl border border-stone-200 dark:divide-stone-800 dark:border-stone-800">
               {items.map((item) => (
                 <li key={item.key} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <div className="flex min-w-0 items-center gap-3">
                     <StateIcon state={item.state} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-stone-900">{item.file.name}</p>
-                      <p className="text-xs text-stone-500">
+                      <p className="truncate text-sm font-medium text-stone-900 dark:text-stone-100">{item.file.name}</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">
                         {formatFileSize(item.file.size)} · {t(`upload.state_${item.state}`)}
                       </p>
                     </div>
@@ -182,7 +182,7 @@ export function DocumentUploadModal({
                       type="button"
                       onClick={() => setItems((prev) => prev.filter((other) => other.key !== item.key))}
                       aria-label={t('upload.remove')}
-                      className="rounded-lg p-1.5 text-stone-500 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700"
+                      className="rounded-lg p-1.5 text-stone-500 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 dark:text-stone-400 dark:hover:bg-stone-800"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -205,7 +205,7 @@ export function DocumentUploadModal({
           </Alert>
         )}
 
-        <div className="flex justify-end gap-3 border-t border-stone-100 pt-3">
+        <div className="flex justify-end gap-3 border-t border-stone-100 pt-3 dark:border-stone-800">
           {finished ? (
             <>
               {needsReview > 0 && (

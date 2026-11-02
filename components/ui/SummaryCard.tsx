@@ -15,21 +15,21 @@ export function SummaryCard({
   loading?: boolean;
 }) {
   return (
-    <article className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+    <article className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-stone-500">{title}</p>
+        <p className="text-sm font-medium text-stone-500 dark:text-stone-400">{title}</p>
         {Icon && (
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-50 text-stone-500">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-50 text-stone-500 dark:bg-stone-800/60 dark:text-stone-400">
             <Icon className="h-4 w-4" aria-hidden />
           </span>
         )}
       </div>
       {loading ? (
-        <div className="mt-4 h-8 w-24 animate-pulse rounded-lg bg-stone-100" />
+        <div className="mt-4 h-8 w-24 animate-pulse rounded-lg bg-stone-100 dark:bg-stone-800" />
       ) : (
-        <p className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">{value}</p>
+        <p className="mt-3 text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">{value}</p>
       )}
-      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">{hint}</p>}
     </article>
   );
 }

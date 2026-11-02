@@ -50,7 +50,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             disabled={disabled}
-            className={`block w-full appearance-none rounded-xl border bg-white dark:bg-zinc-900 px-3.5 py-2 pr-10 text-sm text-zinc-900 dark:text-zinc-100 transition duration-150 ease-in-out focus:outline-none focus:ring-2 disabled:bg-zinc-50 dark:disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed ${
+            className={`block w-full appearance-none rounded-xl border bg-white dark:bg-zinc-900 px-3.5 py-2 pr-10 text-sm text-zinc-900 dark:text-zinc-100 transition duration-150 ease-in-out focus:outline-none focus:ring-2 disabled:bg-zinc-50 dark:disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed dark:disabled:text-zinc-400 ${
               error
                 ? 'border-rose-400 dark:border-rose-600 focus:border-rose-500 focus:ring-rose-500/20'
                 : 'border-zinc-300 dark:border-zinc-700 focus:border-indigo-500 focus:ring-indigo-500/20'
@@ -68,7 +68,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-zinc-400">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-zinc-400 dark:text-zinc-500">
             <ChevronDown className="w-4 h-4" />
           </div>
         </div>

@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative rounded-xl shadow-sm">
           {startIcon && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400 dark:text-zinc-500">
               {startIcon}
             </div>
           )}
@@ -48,7 +48,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             disabled={disabled}
-            className={`block w-full rounded-xl border bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition duration-150 ease-in-out focus:outline-none focus:ring-2 disabled:bg-zinc-50 dark:disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed ${
+            className={`block w-full rounded-xl border bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition duration-150 ease-in-out focus:outline-none focus:ring-2 disabled:bg-zinc-50 dark:disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed dark:disabled:text-zinc-400 ${
               startIcon ? 'pl-10' : ''
             } ${endIcon ? 'pr-10' : ''} ${
               error
@@ -58,7 +58,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {endIcon && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-zinc-400">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-zinc-400 dark:text-zinc-500">
               {endIcon}
             </div>
           )}

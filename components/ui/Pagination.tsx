@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useI18n } from '@/providers/I18nProvider';
 
 export interface PaginationProps {
   currentPage: number;
@@ -20,6 +21,7 @@ export function Pagination({
   onPageChange,
   className = '',
 }: PaginationProps) {
+  const { t } = useI18n();
   if (totalPages <= 1) return null;
 
   const startItem = (currentPage - 1) * pageSize + 1;
@@ -31,16 +33,9 @@ export function Pagination({
     >
       <div>
         {totalCount !== undefined ? (
-          <p>
-            Mostrando <span className="font-medium text-zinc-900 dark:text-zinc-100">{startItem}</span> a{' '}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">{endItem}</span> de{' '}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">{totalCount}</span> resultados
-          </p>
+          <p>{t('common.showing', { start: startItem, end: endItem, total: totalCount })}</p>
         ) : (
-          <p>
-            Página <span className="font-medium text-zinc-900 dark:text-zinc-100">{currentPage}</span> de{' '}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">{totalPages}</span>
-          </p>
+          <p>{t('common.pageOf', { page: currentPage, pages: totalPages })}</p>
         )}
       </div>
 
@@ -51,7 +46,7 @@ export function Pagination({
           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span>Anterior</span>
+          <span>{t('common.previous')}</span>
         </button>
 
         <span className="px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
@@ -63,7 +58,7 @@ export function Pagination({
           disabled={currentPage >= totalPages}
           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
         >
-          <span>Siguiente</span>
+          <span>{t('common.next')}</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

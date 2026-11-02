@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useI18n } from '@/providers/I18nProvider';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function Modal({
   size = 'md',
   showCloseButton = true,
 }: ModalProps) {
+  const { t } = useI18n();
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -83,8 +85,8 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                aria-label="Cerrar modal"
+                className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors dark:text-zinc-500"
+                aria-label={t('common.closeModal')}
               >
                 <X className="w-5 h-5" />
               </button>

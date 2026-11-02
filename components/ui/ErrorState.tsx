@@ -13,17 +13,14 @@ export interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = 'Ocurrió un error',
-  message = 'No pudimos cargar la información solicitada. Por favor intenta nuevamente.',
+  title,
+  message,
   onRetry,
   className = '',
 }: ErrorStateProps) {
   const { t } = useI18n();
-  const resolvedTitle = title === 'Ocurrió un error' ? t('common.errorTitle') : title;
-  const resolvedMessage =
-    message === 'No pudimos cargar la información solicitada. Por favor intenta nuevamente.'
-      ? t('common.errorMessage')
-      : message;
+  const resolvedTitle = title ?? t('common.errorTitle');
+  const resolvedMessage = message ?? t('common.errorMessage');
   return (
     <div
       className={`flex flex-col items-center justify-center p-10 text-center rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20 ${className}`}

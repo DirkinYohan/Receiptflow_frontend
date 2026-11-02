@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AlertTriangle, CheckCircle2, Info, XCircle, X } from 'lucide-react';
+import { useI18n } from '@/providers/I18nProvider';
 
 export interface AlertProps {
   type?: 'info' | 'success' | 'warning' | 'danger';
@@ -18,6 +19,7 @@ export function Alert({
   onClose,
   className = '',
 }: AlertProps) {
+  const { t } = useI18n();
   const styles = {
     info: 'bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 border-sky-200 dark:border-sky-800/80',
     success:
@@ -50,8 +52,8 @@ export function Alert({
       {onClose && (
         <button
           onClick={onClose}
-          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1"
-          aria-label="Cerrar alerta"
+          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 dark:text-zinc-500"
+          aria-label={t('common.closeAlert')}
         >
           <X className="w-4 h-4" />
         </button>

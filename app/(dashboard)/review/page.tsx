@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ArrowLeft, CheckCircle2, ChevronRight, ExternalLink, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -9,7 +10,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { documentsService } from '@/services/documents.service';
-import { categoriesService } from '@/services/categories.service';
+import { useAvailableCategories, useReviewQueue } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
 import { ReviewQueueItem } from '@/types/document';
 import { AvailableCategory } from '@/types/category';
 import { ApiError } from '@/types/api';
@@ -41,16 +44,16 @@ function FilePreview({ item }: { item: ReviewQueueItem }) {
         <img
           src={item.file_url}
           alt={item.title || item.original_filename}
-          className="max-h-[70vh] w-full rounded-xl bg-stone-50 object-contain"
+          className="max-h-[70vh] w-full rounded-xl bg-stone-50 object-contain dark:bg-stone-800/60"
         />
       ) : (
-        <iframe src={item.file_url} title={item.original_filename} className="h-[70vh] w-full rounded-xl bg-stone-50" />
+        <iframe src={item.file_url} title={item.original_filename} className="h-[70vh] w-full rounded-xl bg-stone-50 dark:bg-stone-800/60" />
       )}
       <a
         href={item.file_url}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-emerald-800 hover:underline"
+        className="inline-flex items-center gap-1.5 self-start text-sm font-medium text-emerald-800 hover:underline dark:text-emerald-200"
       >
         <ExternalLink className="h-4 w-4" aria-hidden />
         {t('review.openFile')}
@@ -119,12 +122,12 @@ function ReviewForm({
   return (
     <form onSubmit={approve} className="space-y-5">
       {(item.review_reasons.length > 0 || item.missing_fields.length > 0 || item.status === 'failed') && (
-        <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm">
-          <p className="flex items-center gap-2 font-semibold text-orange-950">
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm dark:border-orange-900 dark:bg-orange-950/40">
+          <p className="flex items-center gap-2 font-semibold text-orange-950 dark:text-orange-200">
             <AlertTriangle className="h-4 w-4" aria-hidden />
             {t('review.why')}
           </p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-orange-900">
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-orange-900 dark:text-orange-200">
             {item.status === 'failed' && <li>{t('review.failed')}</li>}
             {item.review_reasons.map((reason) => (
               <li key={reason}>{reason}</li>
@@ -164,12 +167,12 @@ function ReviewForm({
           label: localizeCategoryName(category, locale),
         }))}
       />
-      <label className="flex items-center gap-2 text-sm text-stone-700">
+      <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
         <input
           type="checkbox"
           checked={isPaid}
           onChange={(e) => setIsPaid(e.target.checked)}
-          className="h-4 w-4 rounded border-stone-300 text-emerald-700"
+          className="h-4 w-4 rounded border-stone-300 text-emerald-700 dark:border-stone-700 dark:text-emerald-300"
         />
         {t('review.paid')}
       </label>
@@ -212,9 +215,9 @@ function ReviewTable({ items, onOpen }: { items: ReviewQueueItem[]; onOpen: (id:
           : '');
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
       <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500">
+        <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:border-stone-800 dark:bg-stone-800/60 dark:text-stone-400">
           <tr>
             <th className="px-4 py-3 font-medium">{t('review.colDocument')}</th>
             <th className="px-4 py-3 font-medium">{t('review.colTotal')}</th>
@@ -224,7 +227,7 @@ function ReviewTable({ items, onOpen }: { items: ReviewQueueItem[]; onOpen: (id:
             <th className="px-4 py-3" aria-label={t('review.open')} />
           </tr>
         </thead>
-        <tbody className="divide-y divide-stone-100">
+        <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
           {items.map((item) => (
             <tr
               key={item.id}
@@ -236,25 +239,25 @@ function ReviewTable({ items, onOpen }: { items: ReviewQueueItem[]; onOpen: (id:
                   onOpen(item.id);
                 }
               }}
-              className="cursor-pointer hover:bg-stone-50 focus:bg-stone-50 focus:outline-none"
+              className="cursor-pointer hover:bg-stone-50 focus:bg-stone-50 focus:outline-none dark:hover:bg-stone-800/60 dark:focus:bg-stone-800/60"
             >
               <td className="max-w-[220px] px-4 py-3">
-                <p className="truncate font-medium text-stone-900">{documentName(item)}</p>
-                <p className="truncate text-xs text-stone-500">
+                <p className="truncate font-medium text-stone-900 dark:text-stone-100">{documentName(item)}</p>
+                <p className="truncate text-xs text-stone-500 dark:text-stone-400">
                   {t(`type.${item.document_type}`)} · {item.original_filename}
                 </p>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 font-semibold text-stone-900">
+              <td className="whitespace-nowrap px-4 py-3 font-semibold text-stone-900 dark:text-stone-100">
                 {item.total_amount != null ? formatCurrency(item.total_amount, item.currency) : t('common.emptyValue')}
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-stone-600">
+              <td className="whitespace-nowrap px-4 py-3 text-stone-600 dark:text-stone-400">
                 {formatDate(item.issued_at) || t('common.noDate')}
               </td>
               <td className="max-w-[320px] px-4 py-3">
-                <p className="line-clamp-2 text-orange-800">{firstReason(item)}</p>
+                <p className="line-clamp-2 text-orange-800 dark:text-orange-200">{firstReason(item)}</p>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-stone-500">{formatDate(item.created_at)}</td>
-              <td className="px-4 py-3 text-right text-stone-400">
+              <td className="whitespace-nowrap px-4 py-3 text-stone-500 dark:text-stone-400">{formatDate(item.created_at)}</td>
+              <td className="px-4 py-3 text-right text-stone-400 dark:text-stone-500">
                 <ChevronRight className="ml-auto h-4 w-4" aria-hidden />
               </td>
             </tr>
@@ -268,39 +271,27 @@ function ReviewTable({ items, onOpen }: { items: ReviewQueueItem[]; onOpen: (id:
 export default function ReviewPage() {
   const { t } = useI18n();
   const { success: toastSuccess, error: toastError } = useToast();
-  const [items, setItems] = useState<ReviewQueueItem[]>([]);
-  const [categories, setCategories] = useState<AvailableCategory[]>([]);
+  const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [reprocessing, setReprocessing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
-  const load = useCallback(async () => {
-    setHasError(false);
-    try {
-      const [queueRes, categoriesRes] = await Promise.all([
-        documentsService.getReviewQueue(),
-        categoriesService.getAvailableCategories(),
-      ]);
-      setItems(queueRes.data?.results ?? []);
-      setCategories(categoriesRes.data ?? []);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const queueQuery = useReviewQueue();
+  const { data: categories = [] } = useAvailableCategories();
+  const items = queueQuery.data ?? [];
+  const isLoading = queueQuery.isPending;
+  const hasError = queueQuery.isError && !queueQuery.data;
+  const load = () => queueQuery.refetch();
 
   const current = items.find((item) => item.id === selectedId) ?? null;
 
   const backToList = () => setSelectedId(null);
 
   const removeCurrent = () => {
-    setItems((prev) => prev.filter((item) => item.id !== selectedId));
+    // Drop it from the cached queue at once; related lists and counters refresh in the background.
+    queryClient.setQueryData<ReviewQueueItem[]>(qk.documents.review, (list = []) =>
+      list.filter((item) => item.id !== selectedId)
+    );
+    invalidateAfter(queryClient, 'document');
     backToList();
   };
 
@@ -311,7 +302,7 @@ export default function ReviewPage() {
       await documentsService.retryProcessing(current.id);
       toastSuccess(t('review.reprocessed'));
       // The new reading may resolve the doubts (it leaves the queue) or bring new ones.
-      await load();
+      await invalidateAfter(queryClient, 'document');
       backToList();
     } catch (err) {
       toastError((err as ApiError).message || t('review.reprocessError'));
@@ -344,11 +335,11 @@ export default function ReviewPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-900">{t('review.title')}</h2>
-          <p className="mt-1 max-w-2xl text-sm text-stone-500">{t('review.subtitle')}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">{t('review.title')}</h2>
+          <p className="mt-1 max-w-2xl text-sm text-stone-500 dark:text-stone-400">{t('review.subtitle')}</p>
         </div>
         {items.length > 0 && !current && (
-          <span className="text-sm font-medium text-stone-500">{t('review.count', { count: items.length })}</span>
+          <span className="text-sm font-medium text-stone-500 dark:text-stone-400">{t('review.count', { count: items.length })}</span>
         )}
       </div>
 
@@ -362,11 +353,11 @@ export default function ReviewPage() {
             {t('review.backToList')}
           </Button>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+            <section className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
               <FilePreview item={current} />
             </section>
-            <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-              <p className="mb-4 truncate text-sm font-medium text-stone-500">{documentName(current)}</p>
+            <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <p className="mb-4 truncate text-sm font-medium text-stone-500 dark:text-stone-400">{documentName(current)}</p>
               <ReviewForm
                 key={current.id}
                 item={current}

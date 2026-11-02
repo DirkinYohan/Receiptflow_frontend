@@ -10,6 +10,7 @@ import { UploadArea } from '@/components/features/documents/UploadArea';
 import { documentsService } from '@/services/documents.service';
 import { formatFileSize } from '@/lib/formatters';
 import { useI18n } from '@/providers/I18nProvider';
+import { ApiError } from '@/types/api';
 
 const MAX_FILES = 20;
 const MAX_SIZE = 20 * 1024 * 1024;
@@ -24,6 +25,7 @@ interface UploadItem {
   file: File;
   state: ItemState;
   docId?: number;
+  error?: string;
 }
 
 const SETTLED: ItemState[] = ['completed', 'review_required', 'failed', 'error'];
@@ -94,8 +96,8 @@ export function DocumentUploadModal({
         status === 'completed' || status === 'review_required' || status === 'failed' ? status : 'processing';
       update(item.key, { docId, state });
       return { key: item.key, docId, state };
-    } catch {
-      update(item.key, { state: 'error' });
+    } catch (err) {
+      update(item.key, { state: 'error', error: (err as ApiError | undefined)?.message });
       return { key: item.key, state: 'error' };
     }
   };
@@ -173,6 +175,9 @@ export function DocumentUploadModal({
                       <p className="text-xs text-stone-500 dark:text-stone-400">
                         {formatFileSize(item.file.size)} · {t(`upload.state_${item.state}`)}
                       </p>
+                      {item.state === 'error' && item.error && (
+                        <p className="break-words text-xs text-red-600 dark:text-red-400">{item.error}</p>
+                      )}
                     </div>
                   </div>
                   {item.state === 'queued' && !running && (

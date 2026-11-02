@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { CalendarClock, Repeat } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -8,7 +9,9 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { PaymentStatus } from '@/components/features/documents/PaymentStatus';
 import { documentsService } from '@/services/documents.service';
-import { expensesService } from '@/services/expenses.service';
+import { usePayables, useRecurringExpenses } from '@/hooks/queries';
+import { qk } from '@/lib/query/keys';
+import { invalidateAfter } from '@/lib/query/invalidate';
 import { DueState, PayableItem, PayablesOverview } from '@/types/document';
 import { RecurringItem, RecurringState } from '@/types/expense';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -19,16 +22,16 @@ import { localizeCategoryName } from '@/lib/i18n/categoryNames';
 const BUCKETS: DueState[] = ['overdue', 'due_soon', 'upcoming', 'no_due_date'];
 
 const BUCKET_STYLE: Record<DueState, string> = {
-  overdue: 'text-red-700',
-  due_soon: 'text-orange-700',
-  upcoming: 'text-stone-700',
-  no_due_date: 'text-stone-500',
+  overdue: 'text-red-700 dark:text-red-300',
+  due_soon: 'text-orange-700 dark:text-orange-300',
+  upcoming: 'text-stone-700 dark:text-stone-300',
+  no_due_date: 'text-stone-500 dark:text-stone-400',
 };
 
 const RECURRING_STYLE: Record<RecurringState, string> = {
-  missing: 'border-red-200 bg-red-50 text-red-800',
-  due_soon: 'border-orange-200 bg-orange-50 text-orange-800',
-  ok: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  missing: 'border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200',
+  due_soon: 'border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-200',
+  ok: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200',
 };
 
 // Dates without time (YYYY-MM-DD) are read at midday so the local timezone can't shift the day.
@@ -44,53 +47,45 @@ function dueLabel(item: PayableItem, t: (key: string, params?: Record<string, st
 export default function PayablesPage() {
   const { locale, t } = useI18n();
   const { success: toastSuccess, error: toastError } = useToast();
-  const [overview, setOverview] = useState<PayablesOverview | null>(null);
-  const [recurring, setRecurring] = useState<RecurringItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const queryClient = useQueryClient();
   const [payingId, setPayingId] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setHasError(false);
-    try {
-      const [payablesRes, recurringRes] = await Promise.all([
-        documentsService.getPayables(),
-        expensesService.getRecurring(),
-      ]);
-      setOverview(payablesRes.data ?? null);
-      setRecurring(recurringRes.data ?? []);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const payablesQuery = usePayables();
+  const recurringQuery = useRecurringExpenses();
+  const overview = payablesQuery.data ?? null;
+  const recurring: RecurringItem[] = recurringQuery.data ?? [];
+  const isLoading = payablesQuery.isPending || recurringQuery.isPending;
+  const hasError = payablesQuery.isError && !payablesQuery.data;
+  const load = () => {
+    payablesQuery.refetch();
+    recurringQuery.refetch();
+  };
 
   const markPaid = async (item: PayableItem) => {
+    // Optimistic: the bill leaves its group at once and comes back if saving fails.
+    const previous = queryClient.getQueryData<PayablesOverview>(qk.documents.payables);
+    queryClient.setQueryData<PayablesOverview>(qk.documents.payables, (prev) =>
+      prev
+        ? {
+            ...prev,
+            buckets: {
+              ...prev.buckets,
+              [item.state]: prev.buckets[item.state].filter((doc) => doc.id !== item.id),
+            },
+            totals: {
+              ...prev.totals,
+              [item.state]: Number(prev.totals[item.state]) - Number(item.total_amount),
+            },
+          }
+        : prev
+    );
     setPayingId(item.id);
     try {
       await documentsService.updateDocument(item.id, { is_paid: true });
       toastSuccess(t('payables.marked'));
-      setOverview((prev) =>
-        prev
-          ? {
-              ...prev,
-              buckets: {
-                ...prev.buckets,
-                [item.state]: prev.buckets[item.state].filter((doc) => doc.id !== item.id),
-              },
-              totals: {
-                ...prev.totals,
-                [item.state]: Number(prev.totals[item.state]) - Number(item.total_amount),
-              },
-            }
-          : prev
-      );
+      invalidateAfter(queryClient, 'documentPaid');
     } catch {
+      queryClient.setQueryData(qk.documents.payables, previous);
       toastError(t('common.errorTitle'));
     } finally {
       setPayingId(null);
@@ -111,8 +106,8 @@ export default function PayablesPage() {
   return (
     <div className="space-y-8 pb-12">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-stone-900">{t('payables.title')}</h2>
-        <p className="mt-1 text-sm text-stone-500">{t('payables.subtitle')}</p>
+        <h2 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">{t('payables.title')}</h2>
+        <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t('payables.subtitle')}</p>
       </div>
 
       {!hasPayables ? (
@@ -120,8 +115,8 @@ export default function PayablesPage() {
       ) : (
         <div className="space-y-6">
           {BUCKETS.filter((bucket) => overview.buckets[bucket].length > 0).map((bucket) => (
-            <section key={bucket} className="rounded-2xl border border-stone-200 bg-white shadow-sm">
-              <header className="flex items-center justify-between border-b border-stone-100 px-5 py-3">
+            <section key={bucket} className="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <header className="flex items-center justify-between border-b border-stone-100 px-5 py-3 dark:border-stone-800">
                 <h3 className={`text-sm font-semibold ${BUCKET_STYLE[bucket]}`}>
                   {t(`payables.${bucket}`)} · {overview.buckets[bucket].length}
                 </h3>
@@ -129,19 +124,19 @@ export default function PayablesPage() {
                   {formatCurrency(overview.totals[bucket])}
                 </span>
               </header>
-              <ul className="divide-y divide-stone-100">
+              <ul className="divide-y divide-stone-100 dark:divide-stone-800">
                 {overview.buckets[bucket].map((item) => (
                   <li key={item.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <Link href={`/documents/${item.id}`} className="min-w-0 hover:underline">
-                      <p className="truncate font-medium text-stone-900">{item.supplier_name || item.title}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="truncate font-medium text-stone-900 dark:text-stone-100">{item.supplier_name || item.title}</p>
+                      <p className="text-sm text-stone-500 dark:text-stone-400">
                         {[localizeCategoryName(item.category_name, locale), item.due_date ? formatDate(item.due_date) : null, dueLabel(item, t)]
                           .filter(Boolean)
                           .join(' · ')}
                       </p>
                     </Link>
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-stone-900">{formatCurrency(item.total_amount, item.currency)}</span>
+                      <span className="font-semibold text-stone-900 dark:text-stone-100">{formatCurrency(item.total_amount, item.currency)}</span>
                       <PaymentStatus paid={false} busy={payingId === item.id} onChange={() => markPaid(item)} />
                     </div>
                   </li>
@@ -152,33 +147,33 @@ export default function PayablesPage() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
         <div className="flex items-start gap-3">
-          <Repeat className="mt-0.5 h-5 w-5 text-emerald-700" aria-hidden />
+          <Repeat className="mt-0.5 h-5 w-5 text-emerald-700 dark:text-emerald-300" aria-hidden />
           <div>
-            <h3 className="text-sm font-semibold text-stone-900">{t('payables.recurringTitle')}</h3>
-            <p className="text-sm text-stone-500">{t('payables.recurringHint')}</p>
+            <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('payables.recurringTitle')}</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400">{t('payables.recurringHint')}</p>
           </div>
         </div>
         {recurring.length === 0 ? (
-          <p className="mt-4 text-sm text-stone-500">{t('payables.recurringEmpty')}</p>
+          <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">{t('payables.recurringEmpty')}</p>
         ) : (
-          <ul className="mt-4 divide-y divide-stone-100">
+          <ul className="mt-4 divide-y divide-stone-100 dark:divide-stone-800">
             {recurring.map((item) => (
               <li
                 key={`${item.supplier_id ?? item.name}`}
                 className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <Link href={`/expenses/${item.last_expense_id}`} className="min-w-0 hover:underline">
-                  <p className="truncate font-medium text-stone-900">{item.name}</p>
-                  <p className="text-sm text-stone-500">
+                  <p className="truncate font-medium text-stone-900 dark:text-stone-100">{item.name}</p>
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
                     {[t(`payables.freq_${item.frequency}`), localizeCategoryName(item.category_name, locale), `${t('payables.next')}: ${dayOnly(item.next_expected)}`]
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
                 </Link>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-stone-600">
+                  <span className="text-sm text-stone-600 dark:text-stone-400">
                     {t('payables.average')} {formatCurrency(item.average_amount, item.currency)}
                   </span>
                   <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${RECURRING_STYLE[item.state]}`}>

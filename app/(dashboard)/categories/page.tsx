@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   FolderTree,
   Plus,
@@ -25,44 +26,30 @@ import { Category } from '@/types/category';
 import { useToast } from '@/hooks/useToast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useI18n } from '@/providers/I18nProvider';
-import { localizeCategoryName } from '@/lib/i18n/categoryNames';
+import { useCategories } from '@/hooks/queries';
+import { invalidateAfter } from '@/lib/query/invalidate';
+import { localizeCategoryDescription, localizeCategoryName } from '@/lib/i18n/categoryNames';
 
 export default function CategoriesPage() {
   const { success: toastSuccess, error: toastError } = useToast();
   const { locale, t } = useI18n();
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const queryClient = useQueryClient();
   const [scopeFilter, setScopeFilter] = useState<'all' | 'system' | 'user'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 350);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  const fetchCategories = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
-    try {
-      const params: Record<string, any> = {
-        page_size: 100,
-      };
-      if (scopeFilter !== 'all') params.scope = scopeFilter;
-      if (debouncedSearch) params.search = debouncedSearch;
-
-      const res = await categoriesService.getCategories(params);
-      setCategories(res.results || []);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [scopeFilter, debouncedSearch]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  const categoriesQuery = useCategories({
+    page_size: 100,
+    ...(scopeFilter !== 'all' ? { scope: scopeFilter } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  });
+  const categories = categoriesQuery.data?.results ?? [];
+  const isLoading = categoriesQuery.isPending;
+  const hasError = categoriesQuery.isError && !categoriesQuery.data;
 
   const handleDelete = async (category: Category) => {
     if (!category.is_editable) {
@@ -80,7 +67,7 @@ export default function CategoriesPage() {
     try {
       await categoriesService.deleteCategory(category.id);
       toastSuccess(t('categories.deleted'));
-      fetchCategories();
+      invalidateAfter(queryClient, 'category');
     } catch (err: any) {
       toastError(err.message || t('categories.deleteError'));
     }
@@ -143,22 +130,22 @@ export default function CategoriesPage() {
       {/* Grid */}
       {isLoading ? (
         <div className="py-16">
-          <LoadingSpinner size="lg" text="Cargando categorías..." />
+          <LoadingSpinner size="lg" text={t('categories.loading')} />
         </div>
       ) : hasError ? (
         <ErrorState
-          title="Error al cargar categorías"
-          message="No se pudieron sincronizar las categorías con el servidor."
-          onRetry={fetchCategories}
+          title={t('categories.loadErrorTitle')}
+          message={t('categories.loadErrorText')}
+          onRetry={() => categoriesQuery.refetch()}
         />
       ) : categories.length === 0 ? (
         <EmptyState
           icon={FolderTree}
-          title="No se encontraron categorías"
+          title={t('categories.emptyTitle')}
           description={
             searchQuery || scopeFilter !== 'all'
-              ? 'No hay categorías que coincidan con la búsqueda.'
-              : 'Aún no has creado categorías personalizadas.'
+              ? t('categories.emptySearch')
+              : t('categories.emptyMine')
           }
           action={
             <Button
@@ -168,7 +155,7 @@ export default function CategoriesPage() {
               }}
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              Crear Categoría
+              {t('categories.create')}
             </Button>
           }
         />
@@ -195,7 +182,7 @@ export default function CategoriesPage() {
                         <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-sm sm:text-base">
                           {localizeCategoryName(cat, locale)}
                         </h4>
-                        <span className="text-[11px] text-zinc-400">
+                        <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
                           {cat.usage_count !== undefined
                             ? t('categories.usages', { count: cat.usage_count })
                             : t('categories.active')}
@@ -210,22 +197,22 @@ export default function CategoriesPage() {
 
                   {cat.description && (
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 line-clamp-2 leading-relaxed">
-                      {cat.description}
+                      {localizeCategoryDescription(cat, locale)}
                     </p>
                   )}
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-zinc-400">
+                  <div className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-500">
                     {isSystem ? (
                       <span className="inline-flex items-center gap-1">
                         <Lock className="w-3.5 h-3.5" />
-                        <span>Protegida</span>
+                        <span>{t('categories.protected')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Personalizable</span>
+                        <span>{t('categories.editable')}</span>
                       </span>
                     )}
                   </div>
@@ -234,15 +221,15 @@ export default function CategoriesPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEdit(cat)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                        title="Editar"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
+                        title={t('common.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(cat)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                        title="Eliminar"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-rose-400"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -263,7 +250,7 @@ export default function CategoriesPage() {
           setSelectedCategory(null);
         }}
         category={selectedCategory}
-        onSuccess={fetchCategories}
+        onSuccess={() => invalidateAfter(queryClient, 'category')}
       />
     </div>
   );

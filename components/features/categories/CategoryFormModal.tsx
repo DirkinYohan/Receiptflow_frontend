@@ -9,6 +9,7 @@ import { Category, CategoryCreatePayload } from '@/types/category';
 import { categoriesService } from '@/services/categories.service';
 import { useToast } from '@/hooks/useToast';
 import { ApiError } from '@/types/api';
+import { useI18n } from '@/providers/I18nProvider';
 
 const PRESET_COLORS = [
   '#6366f1',
@@ -36,6 +37,7 @@ export function CategoryFormModal({
 }) {
   const isEditing = !!category;
   const { success: toastSuccess } = useToast();
+  const { t } = useI18n();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -81,16 +83,16 @@ export function CategoryFormModal({
     try {
       if (isEditing && category) {
         await categoriesService.updateCategory(category.id, payload);
-        toastSuccess('Categoría actualizada con éxito.');
+        toastSuccess(t('categoryForm.updated'));
       } else {
         await categoriesService.createCategory(payload);
-        toastSuccess('Categoría creada exitosamente.');
+        toastSuccess(t('categoryForm.created'));
       }
       onSuccess();
       onClose();
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || 'Error al guardar la categoría.');
+      setErrorMessage(apiErr.message || t('categoryForm.error'));
     } finally {
       setIsLoading(false);
     }
@@ -100,8 +102,8 @@ export function CategoryFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Editar Categoría' : 'Nueva Categoría Personal'}
-      description="Organiza tus comprobantes y gastos mediante etiquetas temáticas."
+      title={isEditing ? t('categoryForm.editTitle') : t('categoryForm.newTitle')}
+      description={t('categoryForm.description')}
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,9 +114,9 @@ export function CategoryFormModal({
         )}
 
         <Input
-          label="Nombre de la categoría"
+          label={t('categoryForm.name')}
           required
-          placeholder="Ej: Materiales de Oficina"
+          placeholder={t('categoryForm.namePlaceholder')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isLoading}
@@ -122,7 +124,7 @@ export function CategoryFormModal({
 
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Color identificador
+            {t('categoryForm.color')}
           </label>
           <div className="flex items-center gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
@@ -141,14 +143,14 @@ export function CategoryFormModal({
 
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-            Descripción (opcional)
+            {t('categoryForm.descriptionLabel')}
           </label>
           <textarea
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-            placeholder="Aclaraciones sobre qué tipo de gastos van aquí..."
+            placeholder={t('categoryForm.descriptionPlaceholder')}
             disabled={isLoading}
           />
         </div>
@@ -159,20 +161,20 @@ export function CategoryFormModal({
             id="cat_active"
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
-            className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500"
+            className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 dark:text-indigo-400"
             disabled={isLoading}
           />
           <label htmlFor="cat_active" className="text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
-            Categoría activa y disponible para selección
+            {t('categoryForm.active')}
           </label>
         </div>
 
         <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button type="submit" isLoading={isLoading}>
-            {isEditing ? 'Guardar Cambios' : 'Crear Categoría'}
+            {isEditing ? t('common.saveChanges') : t('categoryForm.submitNew')}
           </Button>
         </div>
       </form>

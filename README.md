@@ -29,8 +29,13 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Despliegue en Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. *Add New → Project* → importa este repositorio. Vercel detecta **Next.js**; deja Root Directory en `./`
+   y los comandos por defecto.
+2. Variable de entorno: `NEXT_PUBLIC_API_URL` = URL del backend en Render, **sin barra al final**
+   (p. ej. `https://receiptflow-api.onrender.com`).
+3. *Deploy*. Luego agrega la URL de Vercel en `CORS_ALLOWED_ORIGINS` y `APP_FRONTEND_URL` del backend.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`NEXT_PUBLIC_API_URL` se incrusta al compilar: si cambia, haz *Redeploy*. La guía completa
+(Supabase, Render, Vercel y tareas diarias) está en `DEPLOY.md` del repositorio del backend.

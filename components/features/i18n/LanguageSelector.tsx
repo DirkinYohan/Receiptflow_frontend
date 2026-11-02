@@ -16,7 +16,7 @@ export function LanguageSelector({ className = '' }: { className?: string }) {
     <div
       role="group"
       aria-label={t('lang.label')}
-      className={`inline-flex rounded-xl border border-stone-200 bg-white p-1 ${className}`}
+      className={`inline-flex rounded-xl border border-stone-200 bg-white p-1 dark:border-stone-800 dark:bg-stone-900 ${className}`}
     >
       {OPTIONS.map((option) => {
         const active = locale === option.value;
@@ -27,7 +27,7 @@ export function LanguageSelector({ className = '' }: { className?: string }) {
             aria-pressed={active}
             onClick={() => setLocale(option.value)}
             className={`min-h-10 whitespace-nowrap rounded-lg px-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 ${
-              active ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-50'
+              active ? 'bg-stone-900 text-white dark:bg-stone-700' : 'text-stone-600 hover:bg-stone-50 dark:text-stone-400 dark:hover:bg-stone-800/60'
             }`}
           >
             <span className="sm:hidden">{option.value.toUpperCase()}</span>

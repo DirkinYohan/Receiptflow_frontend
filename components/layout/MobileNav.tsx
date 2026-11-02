@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 import { LanguageSelector } from '@/components/features/i18n/LanguageSelector';
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle';
 import { useI18n } from '@/providers/I18nProvider';
 
 const ITEMS = [
@@ -39,27 +40,27 @@ export function MobileNav() {
 
   return (
     <>
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 lg:hidden dark:border-stone-800 dark:bg-stone-900">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-xl p-2 text-stone-700 hover:bg-stone-100"
+          className="rounded-xl p-2 text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
           aria-label={t('menu.open')}
         >
           <Menu className="h-5 w-5" />
         </button>
-        <Link href="/dashboard" className="text-sm font-semibold text-stone-900">
+        <Link href="/dashboard" className="text-sm font-semibold text-stone-900 dark:text-stone-100">
           ReceiptFlow
         </Link>
         <UserMenu />
       </div>
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <button type="button" className="absolute inset-0 bg-stone-900/30" aria-label={t('common.close')} onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-white p-5 shadow-xl">
+          <button type="button" className="absolute inset-0 bg-stone-900/30 dark:bg-stone-700/30" aria-label={t('common.close')} onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-white p-5 shadow-xl dark:bg-stone-900">
             <div className="mb-6 flex items-center justify-between">
-              <span className="font-semibold text-stone-900">ReceiptFlow</span>
-              <button type="button" onClick={() => setOpen(false)} aria-label={t('common.close')} className="rounded-lg p-2 text-stone-500 hover:bg-stone-100">
+              <span className="font-semibold text-stone-900 dark:text-stone-100">ReceiptFlow</span>
+              <button type="button" onClick={() => setOpen(false)} aria-label={t('common.close')} className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -73,7 +74,7 @@ export function MobileNav() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium ${
-                      active ? 'bg-emerald-50 text-emerald-800' : 'text-stone-700 hover:bg-stone-50'
+                      active ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200' : 'text-stone-700 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-stone-800/60'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -82,8 +83,9 @@ export function MobileNav() {
                 );
               })}
             </nav>
-            <div className="mt-6">
+            <div className="mt-6 flex items-center gap-2">
               <LanguageSelector />
+              <ThemeToggle />
             </div>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f8]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f8] dark:bg-stone-950">
         <LoadingState />
       </div>
     );
@@ -27,7 +27,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f6f7f8] text-stone-900 lg:flex-row">
+    <div className="flex min-h-screen flex-col bg-[#f6f7f8] text-stone-900 lg:flex-row dark:bg-stone-950 dark:text-stone-100">
       {/* Mobile top bar */}
       <MobileNav />
 

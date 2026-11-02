@@ -1,14 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Receipt } from 'lucide-react';
 import { useI18n } from '@/providers/I18nProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { getAccessToken } from '@/lib/auth-tokens';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { LanguageSelector } from '@/components/features/i18n/LanguageSelector';
 import { ThemeToggle } from '@/components/features/theme/ThemeToggle';
 
+const SESSION_REDIRECT_ROUTES = ['/login', '/register'];
+
+function subscribeToNothing() {
+  return () => {};
+}
+
+function useHasStoredSession() {
+  return useSyncExternalStore(subscribeToNothing, () => !!getAccessToken(), () => false);
+}
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const { t } = useI18n();
+  const { isLoading, isAuthenticated } = useAuth();
+  const pathname = usePathname();
+  const hasStoredSession = useHasStoredSession();
+  const resumingSession =
+    SESSION_REDIRECT_ROUTES.includes(pathname) && hasStoredSession && (isLoading || isAuthenticated);
 
   return (
     <div className="grid min-h-screen bg-[#f6f7f8] lg:grid-cols-2 dark:bg-stone-950">
@@ -41,7 +60,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <LanguageSelector />
             <ThemeToggle />
           </div>
-          {children}
+          {resumingSession ? <LoadingState text={t('auth.checkingSession')} /> : children}
         </div>
       </div>
     </div>

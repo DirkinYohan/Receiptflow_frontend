@@ -16,7 +16,7 @@ const MAX_FILES = 20;
 const MAX_SIZE = 20 * 1024 * 1024;
 const CONCURRENCY = 3;
 const POLL_MS = 2500;
-const POLL_LIMIT_MS = 60000;
+const POLL_LIMIT_MS = 180000;
 
 type ItemState = 'queued' | 'uploading' | 'processing' | 'completed' | 'review_required' | 'failed' | 'error';
 

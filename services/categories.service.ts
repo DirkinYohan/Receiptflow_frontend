@@ -9,9 +9,11 @@ import { ApiResponse, PaginatedResponse } from '@/types/api';
 
 export const categoriesService = {
   async getCategories(
-    params: { page?: number; scope?: string; is_active?: boolean; search?: string } = {}
+    params: { page?: number; scope?: string; is_active?: boolean; search?: string } = {},
+    signal?: AbortSignal
   ): Promise<PaginatedResponse<Category>> {
     return apiClient<PaginatedResponse<Category>>('/api/v1/categories/', {
+      signal,
       params: params as Record<string, string | number | boolean>,
     });
   },

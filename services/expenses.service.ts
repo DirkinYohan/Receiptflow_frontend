@@ -39,9 +39,11 @@ export const expensesService = {
   },
 
   async getExpenses(
-    params: ExpenseQueryParams = {}
+    params: ExpenseQueryParams = {},
+    signal?: AbortSignal
   ): Promise<PaginatedResponse<Expense>> {
     return apiClient<PaginatedResponse<Expense>>('/api/v1/expenses/', {
+      signal,
       params: params as Record<string, string | number | boolean>,
     });
   },
@@ -88,9 +90,11 @@ export const expensesService = {
   },
 
   async getStats(
-    params: ExpenseQueryParams = {}
+    params: ExpenseQueryParams = {},
+    signal?: AbortSignal
   ): Promise<ApiResponse<ExpenseStats>> {
     return apiClient<ApiResponse<ExpenseStats>>('/api/v1/expenses/stats/', {
+      signal,
       params: params as Record<string, string | number | boolean>,
     });
   },

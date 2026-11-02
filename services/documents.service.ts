@@ -33,9 +33,11 @@ export interface DocumentQueryParams {
 
 export const documentsService = {
   async getDocuments(
-    params: DocumentQueryParams = {}
+    params: DocumentQueryParams = {},
+    signal?: AbortSignal
   ): Promise<PaginatedResponse<Document>> {
     return apiClient<PaginatedResponse<Document>>('/api/v1/documents/', {
+      signal,
       params: params as Record<string, string | number | boolean>,
     });
   },

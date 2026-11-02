@@ -1,12 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, usePathname } from 'next/navigation';
 import { User, LoginCredentials, RegisterPayload } from '@/types/auth';
 import { authService } from '@/services/auth.service';
 import { usersService } from '@/services/users.service';
 import { getAccessToken, setTokens, clearTokens } from '@/lib/auth-tokens';
 import { useToast } from './ToastProvider';
+import { translate } from '@/lib/i18n/translate';
 
 interface AuthContextType {
   user: User | null;
@@ -36,35 +38,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { info: toastInfo } = useToast();
+  const queryClient = useQueryClient();
+  const profileRequest = useRef<Promise<void> | null>(null);
 
-  const fetchCurrentUser = useCallback(async () => {
-    const token = getAccessToken();
-    if (!token) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
+  // Cached data belongs to one account: drop all of it whenever the account changes or ends.
+  const resetCache = useCallback(() => queryClient.clear(), [queryClient]);
 
-    try {
-      const res = await usersService.getProfile();
-      if (res.data) {
-        setUser(res.data);
+  const fetchCurrentUser = useCallback(() => {
+    // React runs mount effects twice in development; share the in-flight request.
+    if (profileRequest.current) return profileRequest.current;
+    profileRequest.current = (async () => {
+      const token = getAccessToken();
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        return;
       }
-    } catch {
-      clearTokens();
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const res = await usersService.getProfile();
+        if (res.data) {
+          setUser(res.data);
+        }
+      } catch {
+        clearTokens();
+        resetCache();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+        profileRequest.current = null;
+      }
+    })();
+    return profileRequest.current;
+  }, [resetCache]);
 
   useEffect(() => {
     fetchCurrentUser();
 
     const handleAuthExpired = () => {
       clearTokens();
+      resetCache();
       setUser(null);
-      toastInfo('Tu sesión ha expirado. Por favor ingresa nuevamente.', 'Sesión terminada');
+      toastInfo(translate('api.sessionExpired'), translate('api.sessionEnded'));
       router.push('/login');
     };
 
@@ -72,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('auth:expired', handleAuthExpired);
     };
-  }, [fetchCurrentUser, router, toastInfo]);
+  }, [fetchCurrentUser, resetCache, router, toastInfo]);
 
   // Route protection
   useEffect(() => {
@@ -92,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const res = await authService.login(credentials);
+      resetCache();
       if (res.tokens) {
         setTokens(res.tokens);
       }
@@ -116,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      resetCache();
       setTokens(res.tokens);
       if (res.user) {
         setUser(res.user);
@@ -132,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authService.logout();
     } finally {
       clearTokens();
+      resetCache();
       setUser(null);
       setIsLoading(false);
       router.push('/login');

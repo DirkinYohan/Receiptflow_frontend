@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
-import { Lock, Mail, KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Lock, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { authService } from '@/services/auth.service';
 import { ApiError } from '@/types/api';
 import { useI18n } from '@/providers/I18nProvider';
@@ -14,11 +14,10 @@ import { useI18n } from '@/providers/I18nProvider';
 function ResetPasswordForm() {
   const { t } = useI18n();
   const searchParams = useSearchParams();
-  const initialEmail = searchParams.get('email') || '';
-  const initialToken = searchParams.get('token') || '';
+  const email = searchParams.get('email') || '';
+  const token = searchParams.get('token') || '';
+  const hasLink = Boolean(email && token);
 
-  const [email, setEmail] = useState(initialEmail);
-  const [token, setToken] = useState(initialToken);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +45,10 @@ function ResetPasswordForm() {
       setIsSuccess(true);
     } catch (err: unknown) {
       const apiErr = err as ApiError;
-      setErrorMessage(apiErr.message || t('auth.resetError'));
+      const fields = apiErr.fieldErrors || {};
+      setErrorMessage(
+        fields.new_password || fields.confirm_password || (apiErr.statusCode === 400 ? t('auth.resetError') : apiErr.message) || t('auth.resetError'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -91,65 +93,66 @@ function ResetPasswordForm() {
         </p>
       </div>
 
-      {errorMessage && (
-        <Alert type="danger" onClose={() => setErrorMessage('')}>
-          {errorMessage}
-        </Alert>
+      {!hasLink ? (
+        <div className="space-y-4">
+          <Alert type="danger">{t('auth.resetLinkInvalid')}</Alert>
+          <Link href="/forgot-password" className="block">
+            <Button className="w-full">{t('auth.requestNewLink')}</Button>
+          </Link>
+        </div>
+      ) : (
+        <>
+          {errorMessage && (
+            <div className="space-y-2">
+              <Alert type="danger" onClose={() => setErrorMessage('')}>
+                {errorMessage}
+              </Alert>
+              <Link
+                href="/forgot-password"
+                className="inline-block text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-300"
+              >
+                {t('auth.requestNewLink')}
+              </Link>
+            </div>
+          )}
+
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            {t('auth.resetForAccount')} <strong className="break-all">{email}</strong>
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label={t('auth.newPassword')}
+              type="password"
+              required
+              placeholder={t('auth.passwordPlaceholder')}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              startIcon={<Lock className="w-4 h-4" />}
+              disabled={isLoading}
+            />
+
+            <Input
+              label={t('auth.confirmNewPassword')}
+              type="password"
+              required
+              placeholder={t('auth.confirmNewPasswordPlaceholder')}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              startIcon={<Lock className="w-4 h-4" />}
+              disabled={isLoading}
+            />
+
+            <Button
+              type="submit"
+              className="w-full mt-2"
+              isLoading={isLoading}
+            >
+              {t('auth.savePassword')}
+            </Button>
+          </form>
+        </>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label={t('auth.emailLabel')}
-          type="email"
-          required
-          placeholder={t('auth.emailPlaceholder')}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          startIcon={<Mail className="w-4 h-4" />}
-          disabled={isLoading}
-        />
-
-        <Input
-          label={t('auth.recoveryToken')}
-          type="text"
-          required
-          placeholder={t('auth.recoveryTokenPlaceholder')}
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          startIcon={<KeyRound className="w-4 h-4" />}
-          disabled={isLoading}
-        />
-
-        <Input
-          label={t('auth.newPassword')}
-          type="password"
-          required
-          placeholder={t('auth.passwordPlaceholder')}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          startIcon={<Lock className="w-4 h-4" />}
-          disabled={isLoading}
-        />
-
-        <Input
-          label={t('auth.confirmNewPassword')}
-          type="password"
-          required
-          placeholder={t('auth.confirmNewPasswordPlaceholder')}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          startIcon={<Lock className="w-4 h-4" />}
-          disabled={isLoading}
-        />
-
-        <Button
-          type="submit"
-          className="w-full mt-2"
-          isLoading={isLoading}
-        >
-          {t('auth.savePassword')}
-        </Button>
-      </form>
     </div>
   );
 }

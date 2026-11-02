@@ -186,7 +186,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
       const fieldErrors: Record<string, string> = {};
       Object.entries(data).forEach(([key, val]) => {
-        if (key !== 'status' && key !== 'message' && key !== 'detail') {
+        if (key === 'errors' && Array.isArray(val)) {
+          val.forEach((item) => {
+            if (item && typeof item === 'object' && typeof item.field === 'string' && typeof item.message === 'string') {
+              fieldErrors[item.field] = fieldErrors[item.field] ? `${fieldErrors[item.field]}, ${item.message}` : item.message;
+            }
+          });
+        } else if (key !== 'status' && key !== 'message' && key !== 'detail') {
           if (Array.isArray(val)) {
             fieldErrors[key] = val.join(', ');
           } else if (typeof val === 'string') {

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { MonthlyExpense } from '@/types/report';
+import { useI18n } from '@/providers/I18nProvider';
 import { formatCurrency, formatMonth } from '@/lib/formatters';
 
 export function ExpenseEvolutionChart({
@@ -13,6 +14,7 @@ export function ExpenseEvolutionChart({
   currency?: string;
   loading?: boolean;
 }) {
+  const { t } = useI18n();
   if (loading) {
     return (
       <div className="h-64 flex items-center justify-center">
@@ -23,8 +25,8 @@ export function ExpenseEvolutionChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-sm text-zinc-400">
-        No hay datos suficientes para mostrar la evolución mensual.
+      <div className="h-64 flex items-center justify-center text-sm text-zinc-400 dark:text-zinc-500">
+        {t('reports.noMonthlyData')}
       </div>
     );
   }
@@ -44,7 +46,7 @@ export function ExpenseEvolutionChart({
               className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative"
             >
               {/* Tooltip */}
-              <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-zinc-900 text-white text-[11px] px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap z-20">
+              <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-zinc-900 text-white text-[11px] px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap z-20 dark:bg-zinc-700">
                 {formatMonth(item.month) || item.label}: {formatCurrency(totalNum, currency)} ({item.count})
               </div>
 

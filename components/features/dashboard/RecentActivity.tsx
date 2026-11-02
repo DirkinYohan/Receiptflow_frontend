@@ -22,60 +22,60 @@ export function RecentActivity({
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="h-64 animate-pulse rounded-2xl bg-white" />
-        <div className="h-64 animate-pulse rounded-2xl bg-white" />
+        <div className="h-64 animate-pulse rounded-2xl bg-white dark:bg-stone-900" />
+        <div className="h-64 animate-pulse rounded-2xl bg-white dark:bg-stone-900" />
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-stone-900">{t('dashboard.recentExpenses')}</h3>
-          <Link href="/expenses" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800">
+          <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('dashboard.recentExpenses')}</h3>
+          <Link href="/expenses" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200">
             {t('dashboard.seeAll')} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         {expenses.length === 0 ? (
-          <p className="py-8 text-center text-sm text-stone-500">{t('dashboard.noExpenses')}</p>
+          <p className="py-8 text-center text-sm text-stone-500 dark:text-stone-400">{t('dashboard.noExpenses')}</p>
         ) : (
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
             {expenses.slice(0, 5).map((expense) => (
               <li key={expense.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-stone-900">{expense.description || t('dashboard.noDescription')}</p>
-                  <p className="text-xs text-stone-500">
+                  <p className="truncate font-medium text-stone-900 dark:text-stone-100">{expense.description || t('dashboard.noDescription')}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     {expense.supplier.name || t('dashboard.noSupplier')} · {formatDate(expense.incurred_at) || t('common.noDate')}
                   </p>
                 </div>
-                <span className="shrink-0 font-semibold text-stone-900">{formatCurrency(expense.amount, expense.currency)}</span>
+                <span className="shrink-0 font-semibold text-stone-900 dark:text-stone-100">{formatCurrency(expense.amount, expense.currency)}</span>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-stone-900">{t('dashboard.recentDocuments')}</h3>
-          <Link href="/documents" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800">
+          <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('dashboard.recentDocuments')}</h3>
+          <Link href="/documents" className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200">
             {t('dashboard.seeAll')} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         {documents.length === 0 ? (
-          <p className="py-8 text-center text-sm text-stone-500">{t('dashboard.noDocuments')}</p>
+          <p className="py-8 text-center text-sm text-stone-500 dark:text-stone-400">{t('dashboard.noDocuments')}</p>
         ) : (
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-stone-100 dark:divide-stone-800">
             {documents.slice(0, 5).map((doc) => (
               <li key={doc.id}>
                 <Link href={`/documents/${doc.id}`} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-stone-900">{doc.supplier_name || doc.title}</p>
-                    <p className="text-xs text-stone-500">{formatDate(doc.issued_at || doc.created_at) || t('common.noDate')}</p>
+                    <p className="truncate font-medium text-stone-900 dark:text-stone-100">{doc.supplier_name || doc.title}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{formatDate(doc.issued_at || doc.created_at) || t('common.noDate')}</p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="font-semibold text-stone-900">
+                    <span className="font-semibold text-stone-900 dark:text-stone-100">
                       {doc.total_amount ? formatCurrency(doc.total_amount, doc.currency) : t('common.emptyValue')}
                     </span>
                     <StatusBadge status={doc.status} />

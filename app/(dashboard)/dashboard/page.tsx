@@ -1,23 +1,24 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CalendarClock, CheckCircle2, Clock, FileText, RefreshCw, Upload, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SummaryCard } from '@/components/ui/SummaryCard';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { RecentActivity } from '@/components/features/dashboard/RecentActivity';
 import { BudgetSummary } from '@/components/features/categories/BudgetsPanel';
-import { reportsService } from '@/services/reports.service';
-import { documentsService } from '@/services/documents.service';
 import { formatCurrency, formatMonth } from '@/lib/formatters';
+import { qk } from '@/lib/query/keys';
 import {
-  DashboardSummary,
-  MonthlyExpense,
-  RecentDocumentItem,
-  RecentExpenseItem,
-} from '@/types/report';
-import { DocumentStats, PayablesOverview } from '@/types/document';
+  useDashboardSummary,
+  useDocumentStats,
+  useMonthlyExpenses,
+  usePayables,
+  useRecentDocuments,
+  useRecentExpenses,
+} from '@/hooks/queries';
 import { useI18n } from '@/providers/I18nProvider';
 
 const PERIODS = [
@@ -29,49 +30,37 @@ const PERIODS = [
 
 export default function DashboardPage() {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [periodMonths, setPeriodMonths] = useState(6);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [docStats, setDocStats] = useState<DocumentStats | null>(null);
-  const [monthlyExpenses, setMonthlyExpenses] = useState<MonthlyExpense[]>([]);
-  const [recentExpenses, setRecentExpenses] = useState<RecentExpenseItem[]>([]);
-  const [recentDocuments, setRecentDocuments] = useState<RecentDocumentItem[]>([]);
-  const [payables, setPayables] = useState<PayablesOverview | null>(null);
+  const range = { months: periodMonths };
 
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true);
-    setHasError(false);
-    try {
-      const [summaryRes, docStatsRes, monthlyRes, recentExpRes, recentDocRes, payablesRes] = await Promise.all([
-        reportsService.getDashboardSummary({ months: periodMonths }),
-        documentsService.getStats(),
-        reportsService.getMonthlyExpenses({ months: periodMonths }),
-        reportsService.getRecentExpenses(5),
-        reportsService.getRecentDocuments(5),
-        documentsService.getPayables(),
-      ]);
-      if (summaryRes.data) setSummary(summaryRes.data);
-      if (docStatsRes.data) setDocStats(docStatsRes.data);
-      if (monthlyRes.data) setMonthlyExpenses(monthlyRes.data);
-      if (recentExpRes.data) setRecentExpenses(recentExpRes.data);
-      if (recentDocRes.data) setRecentDocuments(recentDocRes.data);
-      if (payablesRes.data) setPayables(payablesRes.data);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [periodMonths]);
+  // Each block loads on its own: a slow one no longer holds the others back.
+  const summaryQuery = useDashboardSummary(range);
+  const statsQuery = useDocumentStats();
+  const monthlyQuery = useMonthlyExpenses(range);
+  const recentExpensesQuery = useRecentExpenses(5);
+  const recentDocumentsQuery = useRecentDocuments(5);
+  const payablesQuery = usePayables();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+  const summary = summaryQuery.data ?? null;
+  const docStats = statsQuery.data ?? null;
+  const monthlyExpenses = monthlyQuery.data ?? [];
+  const payables = payablesQuery.data ?? null;
+  const isLoading = summaryQuery.isPending || statsQuery.isPending;
+  const isRefreshing = [summaryQuery, statsQuery, monthlyQuery, payablesQuery].some((q) => q.isFetching);
+  const hasError = summaryQuery.isError && statsQuery.isError;
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: qk.dashboard.all });
+    queryClient.invalidateQueries({ queryKey: qk.documents.stats });
+    queryClient.invalidateQueries({ queryKey: qk.documents.payables });
+    queryClient.invalidateQueries({ queryKey: qk.budgets.all });
+  };
 
   if (hasError) {
     return (
       <div className="py-12">
-        <ErrorState title={t('common.errorTitle')} message={t('dashboard.loadError')} onRetry={fetchDashboardData} />
+        <ErrorState title={t('common.errorTitle')} message={t('dashboard.loadError')} onRetry={refresh} />
       </div>
     );
   }
@@ -87,18 +76,18 @@ export default function DashboardPage() {
     <div className="space-y-8 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-stone-900">{t('dashboard.title')}</h2>
-          <p className="mt-1 text-sm text-stone-500">{t('dashboard.subtitle')}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-100">{t('dashboard.title')}</h2>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-xl border border-stone-200 bg-white p-1">
+          <div className="flex rounded-xl border border-stone-200 bg-white p-1 dark:border-stone-800 dark:bg-stone-900">
             {PERIODS.map((period) => (
               <button
                 key={period.value}
                 type="button"
                 onClick={() => setPeriodMonths(period.value)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                  periodMonths === period.value ? 'bg-stone-900 text-white' : 'text-stone-600'
+                  periodMonths === period.value ? 'bg-stone-900 text-white dark:bg-stone-700' : 'text-stone-600 dark:text-stone-400'
                 }`}
               >
                 {t(period.labelKey)}
@@ -107,12 +96,12 @@ export default function DashboardPage() {
           </div>
           <button
             type="button"
-            onClick={fetchDashboardData}
-            disabled={isLoading}
+            onClick={refresh}
+            disabled={isRefreshing}
             aria-label={t('common.refresh')}
-            className="rounded-xl border border-stone-200 bg-white p-2 text-stone-600"
+            className="rounded-xl border border-stone-200 bg-white p-2 text-stone-600 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-400"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
           <Link href="/documents">
             <Button size="sm" leftIcon={<Upload className="h-4 w-4" />}>
@@ -123,14 +112,14 @@ export default function DashboardPage() {
       </div>
 
       {reviewCount > 0 && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-orange-900 dark:bg-orange-950/40">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-orange-700" aria-hidden />
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-orange-700 dark:text-orange-300" aria-hidden />
             <div>
-              <p className="text-sm font-semibold text-orange-950">
+              <p className="text-sm font-semibold text-orange-950 dark:text-orange-200">
                 {reviewCount === 1 ? t('dashboard.reviewBannerOne') : t('dashboard.reviewBanner', { count: reviewCount })}
               </p>
-              <p className="text-sm text-orange-800">{t('dashboard.reviewHint')}</p>
+              <p className="text-sm text-orange-800 dark:text-orange-200">{t('dashboard.reviewHint')}</p>
             </div>
           </div>
           <Link href="/review">
@@ -142,19 +131,19 @@ export default function DashboardPage() {
       {urgent.length > 0 && (
         <div
           className={`flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between ${
-            overdue.length ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'
+            overdue.length ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40' : 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40'
           }`}
         >
           <div className="flex items-start gap-3">
-            <CalendarClock className={`mt-0.5 h-5 w-5 ${overdue.length ? 'text-red-700' : 'text-amber-700'}`} aria-hidden />
+            <CalendarClock className={`mt-0.5 h-5 w-5 ${overdue.length ? 'text-red-700 dark:text-red-300' : 'text-amber-700 dark:text-amber-300'}`} aria-hidden />
             <div>
-              <p className={`text-sm font-semibold ${overdue.length ? 'text-red-950' : 'text-amber-950'}`}>
+              <p className={`text-sm font-semibold ${overdue.length ? 'text-red-950 dark:text-red-200' : 'text-amber-950 dark:text-amber-200'}`}>
                 {t(overdue.length ? 'dashboard.payBannerOverdue' : 'dashboard.payBannerSoon', {
                   count: urgent.length,
                   amount: formatCurrency(payables?.totals[overdue.length ? 'overdue' : 'due_soon'] ?? 0),
                 })}
               </p>
-              <p className={`text-sm ${overdue.length ? 'text-red-800' : 'text-amber-800'}`}>{t('dashboard.payBannerHint')}</p>
+              <p className={`text-sm ${overdue.length ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>{t('dashboard.payBannerHint')}</p>
             </div>
           </div>
           <Link href="/payables">
@@ -172,18 +161,18 @@ export default function DashboardPage() {
         <SummaryCard title={t('dashboard.paid')} value={docStats?.paid ?? 0} icon={CheckCircle2} loading={isLoading} />
       </div>
 
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-stone-900">{t('dashboard.monthly')}</h3>
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+        <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('dashboard.monthly')}</h3>
         <div className="mt-4 space-y-3">
           {monthlyExpenses.map((item) => {
             const width = Math.max(4, Math.round(((Number(item.total) || 0) / maxMonth) * 100));
             return (
               <div key={item.month} className="grid grid-cols-[88px_1fr_auto] items-center gap-3 text-sm">
-                <span className="text-stone-500">{formatMonth(item.month) || item.label}</span>
-                <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                <span className="text-stone-500 dark:text-stone-400">{formatMonth(item.month) || item.label}</span>
+                <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
                   <div className="h-full rounded-full bg-emerald-600" style={{ width: `${width}%` }} />
                 </div>
-                <span className="font-medium text-stone-800">{formatCurrency(item.total)}</span>
+                <span className="font-medium text-stone-800 dark:text-stone-200">{formatCurrency(item.total)}</span>
               </div>
             );
           })}
@@ -192,7 +181,11 @@ export default function DashboardPage() {
 
       <BudgetSummary />
 
-      <RecentActivity expenses={recentExpenses} documents={recentDocuments} loading={isLoading} />
+      <RecentActivity
+        expenses={recentExpensesQuery.data ?? []}
+        documents={recentDocumentsQuery.data ?? []}
+        loading={recentExpensesQuery.isPending || recentDocumentsQuery.isPending}
+      />
     </div>
   );
 }

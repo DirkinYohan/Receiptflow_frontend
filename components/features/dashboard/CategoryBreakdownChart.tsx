@@ -29,7 +29,7 @@ export function CategoryBreakdownChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-sm text-zinc-400">
+      <div className="h-48 flex items-center justify-center text-sm text-zinc-400 dark:text-zinc-500">
         {t('reports.noCategoryData')}
       </div>
     );
@@ -66,13 +66,13 @@ export function CategoryBreakdownChart({
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {localizeCategoryName(cat, locale) || t('common.noCategory')}
                 </span>
-                <span className="text-zinc-400 text-xs">({cat.count} reg.)</span>
+                <span className="text-zinc-400 text-xs dark:text-zinc-500">({cat.count} reg.)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                   {formatCurrency(totalNum, currency)}
                 </span>
-                <span className="text-zinc-400 font-medium text-xs w-8 text-right">
+                <span className="text-zinc-400 font-medium text-xs w-8 text-right dark:text-zinc-500">
                   {pct}%
                 </span>
               </div>

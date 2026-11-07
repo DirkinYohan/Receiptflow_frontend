@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,6 +10,7 @@ import { Expense, ExpenseCreatePayload } from '@/types/expense';
 import { expensesService } from '@/services/expenses.service';
 import { useToast } from '@/hooks/useToast';
 import { ApiError } from '@/types/api';
+import { PaymentMethod } from '@/types/document';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAvailableCategories, useSupplierOptions } from '@/hooks/queries';
 import { invalidateAfter } from '@/lib/query/invalidate';
@@ -53,7 +54,9 @@ export function ExpenseFormModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
+  const [syncedWith, setSyncedWith] = useState({ isOpen: false, item: expense });
+  if (syncedWith.isOpen !== isOpen || syncedWith.item !== expense) {
+    setSyncedWith({ isOpen, item: expense });
     if (isOpen) {
       if (expense) {
         setFormData({
@@ -88,7 +91,7 @@ export function ExpenseFormModal({
       }
       setErrorMessage('');
     }
-  }, [isOpen, expense]);
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -113,7 +116,7 @@ export function ExpenseFormModal({
       category: formData.category ? Number(formData.category) : null,
       supplier: formData.supplier ? Number(formData.supplier) : null,
       incurred_at: new Date(formData.incurred_at).toISOString(),
-      payment_method: (formData.payment_method as any) || '',
+      payment_method: (formData.payment_method as PaymentMethod | '') || '',
       tax_amount: formData.tax_amount ? Number(formData.tax_amount) : 0,
       is_recurring: formData.is_recurring,
       recurring_frequency: formData.is_recurring ? formData.recurring_frequency : '',

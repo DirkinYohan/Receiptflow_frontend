@@ -13,7 +13,6 @@ import {
   Phone,
   FileText,
   Receipt,
-  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -131,7 +130,7 @@ export default function SuppliersPage() {
         tabs={tabs}
         activeTab={filterTab}
         onTabChange={(id) => {
-          setFilterTab(id as any);
+          setFilterTab(id as 'all' | 'favorites');
           setCurrentPage(1);
         }}
       />

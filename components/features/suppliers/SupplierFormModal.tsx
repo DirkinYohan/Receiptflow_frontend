@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -40,7 +40,9 @@ export function SupplierFormModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
+  const [syncedWith, setSyncedWith] = useState({ isOpen: false, item: supplier });
+  if (syncedWith.isOpen !== isOpen || syncedWith.item !== supplier) {
+    setSyncedWith({ isOpen, item: supplier });
     if (isOpen) {
       if (supplier) {
         setFormData({
@@ -67,7 +69,7 @@ export function SupplierFormModal({
       }
       setErrorMessage('');
     }
-  }, [isOpen, supplier]);
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

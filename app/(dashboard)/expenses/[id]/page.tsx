@@ -8,13 +8,8 @@ import {
   ArrowLeft,
   Edit,
   Trash2,
-  Receipt,
   FileText,
-  Calendar,
-  Building2,
-  FolderTree,
   Repeat,
-  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -23,7 +18,6 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { ExpenseFormModal } from '@/components/features/expenses/ExpenseFormModal';
 import { DocumentBreakdown } from '@/components/features/documents/DocumentBreakdown';
 import { expensesService } from '@/services/expenses.service';
-import { ExpenseDetail } from '@/types/expense';
 import { formatCurrency, formatDateTime } from '@/lib/formatters';
 import { useToast } from '@/hooks/useToast';
 import { useI18n } from '@/providers/I18nProvider';

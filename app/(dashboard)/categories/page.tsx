@@ -29,6 +29,7 @@ import { useI18n } from '@/providers/I18nProvider';
 import { useCategories } from '@/hooks/queries';
 import { invalidateAfter } from '@/lib/query/invalidate';
 import { localizeCategoryDescription, localizeCategoryName } from '@/lib/i18n/categoryNames';
+import { ApiError } from '@/types/api';
 
 export default function CategoriesPage() {
   const { success: toastSuccess, error: toastError } = useToast();
@@ -68,8 +69,8 @@ export default function CategoriesPage() {
       await categoriesService.deleteCategory(category.id);
       toastSuccess(t('categories.deleted'));
       invalidateAfter(queryClient, 'category');
-    } catch (err: any) {
-      toastError(err.message || t('categories.deleteError'));
+    } catch (err: unknown) {
+      toastError((err as ApiError).message || t('categories.deleteError'));
     }
   };
 
@@ -112,7 +113,7 @@ export default function CategoriesPage() {
       <Tabs
         tabs={tabs}
         activeTab={scopeFilter}
-        onTabChange={(id) => setScopeFilter(id as any)}
+        onTabChange={(id) => setScopeFilter(id as 'all' | 'system' | 'user')}
       />
 
       <div className="max-w-md">

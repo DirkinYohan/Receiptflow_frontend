@@ -156,12 +156,21 @@ export async function apiClient<T>(
   return handleResponse<T>(response);
 }
 
+type ErrorItem = { field?: unknown; message?: string } | null;
+
+type ErrorBody = {
+  message?: unknown;
+  detail?: unknown;
+  errors?: (string | ErrorItem)[];
+  [key: string]: unknown;
+};
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 204) {
     return {} as T;
   }
 
-  let data: any;
+  let data: unknown;
   const contentType = response.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
     data = await response.json();
@@ -176,18 +185,20 @@ async function handleResponse<T>(response: Response): Promise<T> {
     };
 
     if (data && typeof data === 'object') {
-      if (typeof data.message === 'string') {
-        error.message = data.message;
-      } else if (typeof data.detail === 'string') {
-        error.message = data.detail;
-      } else if (Array.isArray(data.errors) && data.errors.length > 0) {
-        error.message = typeof data.errors[0] === 'string' ? data.errors[0] : (data.errors[0].message || translate('api.validation'));
+      const body = data as ErrorBody;
+      if (typeof body.message === 'string') {
+        error.message = body.message;
+      } else if (typeof body.detail === 'string') {
+        error.message = body.detail;
+      } else if (Array.isArray(body.errors) && body.errors.length > 0) {
+        const first = body.errors[0];
+        error.message = typeof first === 'string' ? first : (first?.message || translate('api.validation'));
       }
 
       const fieldErrors: Record<string, string> = {};
-      Object.entries(data).forEach(([key, val]) => {
+      Object.entries(body).forEach(([key, val]) => {
         if (key === 'errors' && Array.isArray(val)) {
-          val.forEach((item) => {
+          (val as ErrorItem[]).forEach((item) => {
             if (item && typeof item === 'object' && typeof item.field === 'string' && typeof item.message === 'string') {
               fieldErrors[item.field] = fieldErrors[item.field] ? `${fieldErrors[item.field]}, ${item.message}` : item.message;
             }
@@ -202,7 +213,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       });
       if (Object.keys(fieldErrors).length > 0) {
         error.fieldErrors = fieldErrors;
-        if (!data.message && !data.detail) {
+        if (!body.message && !body.detail) {
           const firstField = Object.keys(fieldErrors)[0];
           error.message = `${firstField}: ${fieldErrors[firstField]}`;
         }

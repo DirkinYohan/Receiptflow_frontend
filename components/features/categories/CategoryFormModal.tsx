@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -48,7 +48,9 @@ export function CategoryFormModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
+  const [syncedWith, setSyncedWith] = useState({ isOpen: false, item: category });
+  if (syncedWith.isOpen !== isOpen || syncedWith.item !== category) {
+    setSyncedWith({ isOpen, item: category });
     if (isOpen) {
       if (category) {
         setName(category.name || '');
@@ -65,7 +67,7 @@ export function CategoryFormModal({
       }
       setErrorMessage('');
     }
-  }, [isOpen, category]);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

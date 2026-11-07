@@ -26,7 +26,7 @@ const TEXT_COLOR: Record<BudgetState, string> = {
 };
 
 function BudgetBar({ budget }: { budget: CategoryBudget }) {
-  const { locale, t } = useI18n();
+  const { t } = useI18n();
   const pct = Math.min(Number(budget.status.percentage), 100);
   return (
     <div>
@@ -165,7 +165,7 @@ function BudgetRow({
 }
 
 export function BudgetsPanel() {
-  const { locale, t } = useI18n();
+  const { t } = useI18n();
   const { data: budgets = [] } = useBudgets();
   const { data: categories = [] } = useAvailableCategories();
 

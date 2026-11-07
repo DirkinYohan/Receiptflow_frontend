@@ -5,11 +5,8 @@ import {
   User as UserIcon,
   Lock,
   Shield,
-  CheckCircle2,
   Calendar,
-  Clock,
   Save,
-  AlertCircle,
   KeyRound,
   Camera,
 } from 'lucide-react';
@@ -29,7 +26,7 @@ import { ApiError } from '@/types/api';
 
 export default function SettingsPage() {
   const { user, refreshUser, updateUserData } = useAuth();
-  const { success: toastSuccess, error: toastError } = useToast();
+  const { success: toastSuccess } = useToast();
   const { t } = useI18n();
 
   const [firstName, setFirstName] = useState(user?.first_name || '');

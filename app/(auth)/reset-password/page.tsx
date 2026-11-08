@@ -16,7 +16,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const token = searchParams.get('token') || '';
-  const hasLink = Boolean(email && token);
+  const hasLink = Boolean(token);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -37,7 +37,7 @@ function ResetPasswordForm() {
 
     try {
       await authService.confirmPasswordReset({
-        email,
+        ...(email ? { email } : {}),
         token,
         new_password: newPassword,
         confirm_password: confirmPassword,
@@ -116,9 +116,11 @@ function ResetPasswordForm() {
             </div>
           )}
 
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">
-            {t('auth.resetForAccount')} <strong className="break-all">{email}</strong>
-          </p>
+          {email && (
+            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+              {t('auth.resetForAccount')} <strong className="break-all">{email}</strong>
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input

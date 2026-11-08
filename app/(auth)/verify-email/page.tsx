@@ -19,7 +19,7 @@ function VerifyEmailContent() {
   const initialToken = searchParams.get('token') || '';
 
   const [email, setEmail] = useState(initialEmail);
-  const [isLoading, setIsLoading] = useState(Boolean(initialEmail && initialToken));
+  const [isLoading, setIsLoading] = useState(Boolean(initialToken));
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
@@ -30,9 +30,9 @@ function VerifyEmailContent() {
   }, [t]);
 
   useEffect(() => {
-    if (!initialEmail || !initialToken) return;
+    if (!initialToken) return;
     authService
-      .verifyEmail({ email: initialEmail, token: initialToken })
+      .verifyEmail(initialEmail ? { email: initialEmail, token: initialToken } : { token: initialToken })
       .then(() => setIsSuccess(true))
       .catch((err: unknown) => {
         const apiErr = err as ApiError;

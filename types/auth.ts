@@ -61,14 +61,14 @@ export interface PasswordResetRequestPayload {
 }
 
 export interface PasswordResetConfirmPayload {
-  email: string;
+  email?: string;
   token: string;
   new_password: string;
   confirm_password: string;
 }
 
 export interface EmailVerificationPayload {
-  email: string;
+  email?: string;
   token: string;
 }
 

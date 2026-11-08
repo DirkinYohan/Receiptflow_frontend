@@ -52,3 +52,32 @@ test('protected pages redirect to login without a session', async ({ page }) => 
   await page.goto('/expenses');
   await expect(page).toHaveURL(/\/login\?redirect=%2Fexpenses/);
 });
+
+test('reset-password works with a link that only has the token', async ({ page }) => {
+  let body: Record<string, unknown> = {};
+  await mockApi(page, {
+    '/api/auth/password-reset/confirm/': async (route) => {
+      body = route.request().postDataJSON();
+      await route.fulfill({ json: { status: 'success', message: 'Contraseña restablecida correctamente.' } });
+    },
+  });
+  await page.goto('/reset-password?token=' + 'a'.repeat(64));
+  await page.getByRole('textbox', { name: /^Nueva contraseña/ }).fill('Nuev4Clave!Segura');
+  await page.getByRole('textbox', { name: /^Confirmar nueva contraseña/ }).fill('Nuev4Clave!Segura');
+  await page.getByRole('button', { name: 'Guardar nueva contraseña' }).click();
+  await expect(page.getByRole('button', { name: /iniciar sesión/i })).toBeVisible();
+  expect(body).toEqual({ token: 'a'.repeat(64), new_password: 'Nuev4Clave!Segura', confirm_password: 'Nuev4Clave!Segura' });
+});
+
+test('verify-email verifies a link that only has the token', async ({ page }) => {
+  let body: Record<string, unknown> = {};
+  await mockApi(page, {
+    '/api/auth/verify-email/': async (route) => {
+      body = route.request().postDataJSON();
+      await route.fulfill({ json: { status: 'success', message: 'Correo electrónico verificado correctamente.' } });
+    },
+  });
+  await page.goto('/verify-email?token=' + 'b'.repeat(64));
+  await expect(page.getByRole('button', { name: /iniciar sesión|Ir al inicio/i })).toBeVisible();
+  expect(body).toEqual({ token: 'b'.repeat(64) });
+});

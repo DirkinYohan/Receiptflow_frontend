@@ -8,7 +8,7 @@ export interface KpiCardProps {
   subtitle?: string;
   changePct?: number;
   icon: LucideIcon;
-  variant?: 'indigo' | 'emerald' | 'amber' | 'violet' | 'rose';
+  variant?: 'emerald' | 'amber' | 'violet' | 'rose';
   loading?: boolean;
 }
 
@@ -18,12 +18,11 @@ export function KpiCard({
   subtitle,
   changePct,
   icon: Icon,
-  variant = 'indigo',
+  variant = 'emerald',
   loading = false,
 }: KpiCardProps) {
   const iconVariants = {
-    indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400',
-    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
+    emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400',
     amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
     violet: 'bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400',
     rose: 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400',
@@ -32,7 +31,7 @@ export function KpiCard({
   return (
     <Card className="p-5 flex flex-col justify-between">
       <div className="flex items-start justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
           {title}
         </span>
         <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${iconVariants[variant]}`}>
@@ -42,9 +41,9 @@ export function KpiCard({
 
       <div className="mt-4">
         {loading ? (
-          <div className="h-8 w-28 bg-zinc-200 dark:bg-zinc-800 animate-pulse rounded-lg" />
+          <div className="h-8 w-28 bg-stone-200 dark:bg-stone-800 animate-pulse rounded-lg" />
         ) : (
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
             {value}
           </h3>
         )}
@@ -67,7 +66,7 @@ export function KpiCard({
             </span>
           )}
           {subtitle && (
-            <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+            <span className="text-xs text-stone-500 dark:text-stone-400 truncate">
               {subtitle}
             </span>
           )}

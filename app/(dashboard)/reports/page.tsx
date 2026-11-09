@@ -95,10 +95,10 @@ export default function ReportsPage() {
     <div className="space-y-8 pb-16">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
             {t('reports.title')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
             {t('reports.subtitle')}
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function ReportsPage() {
           <div
             role="group"
             aria-label={t('reports.title')}
-            className="flex rounded-xl border border-zinc-200 bg-white p-1 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900"
+            className="flex rounded-xl border border-stone-200 bg-white p-1 shadow-2xs dark:border-stone-800 dark:bg-stone-900"
           >
             {PRESETS.map((item) => (
               <button
@@ -118,7 +118,7 @@ export default function ReportsPage() {
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 ${
                   preset === item.id
                     ? 'bg-stone-900 text-white dark:bg-stone-700'
-                    : 'text-stone-600 hover:bg-stone-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                    : 'text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
                 }`}
               >
                 {t(item.labelKey)}
@@ -126,8 +126,8 @@ export default function ReportsPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-1.5 shadow-2xs">
-            <Calendar className="w-4 h-4 text-zinc-400 ml-1.5 dark:text-zinc-500" />
+          <div className="flex items-center gap-2 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-1.5 shadow-2xs">
+            <Calendar className="w-4 h-4 text-stone-400 ml-1.5 dark:text-stone-500" />
             <input
               type="date"
               value={startDate}
@@ -135,9 +135,9 @@ export default function ReportsPage() {
                 setPreset(null);
                 setStartDate(e.target.value);
               }}
-              className="text-xs bg-transparent border-0 focus:outline-none text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              className="text-xs bg-transparent border-0 focus:outline-none text-stone-700 dark:text-stone-300 cursor-pointer"
             />
-            <span className="text-zinc-300 dark:text-zinc-700 text-xs">—</span>
+            <span className="text-stone-300 dark:text-stone-700 text-xs">—</span>
             <input
               type="date"
               value={endDate}
@@ -145,7 +145,7 @@ export default function ReportsPage() {
                 setPreset(null);
                 setEndDate(e.target.value);
               }}
-              className="text-xs bg-transparent border-0 focus:outline-none text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              className="text-xs bg-transparent border-0 focus:outline-none text-stone-700 dark:text-stone-300 cursor-pointer"
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function ReportsPage() {
               label={t('reports.max')}
               value={formatCurrency(summary?.max_expense ?? 0)}
               hint={t('reports.maxHint')}
-              valueClassName="text-indigo-600 dark:text-indigo-400"
+              valueClassName="text-emerald-700 dark:text-emerald-400"
             />
             <StatCard
               label={t('reports.receipts')}
@@ -227,19 +227,19 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Building2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <Building2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>{t('reports.topSuppliers')}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {supplierExpenses.length === 0 ? (
-                <div className="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                <div className="p-8 text-center text-xs text-stone-400 dark:text-stone-500">
                   {t('reports.noSupplierData')}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs sm:text-sm">
-                    <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 font-semibold uppercase tracking-wider text-[11px] dark:text-zinc-400">
+                    <thead className="bg-stone-50 dark:bg-stone-800/60 border-b border-stone-200 dark:border-stone-800 text-stone-500 font-semibold uppercase tracking-wider text-[11px] dark:text-stone-400">
                       <tr>
                         <th className="py-2.5 px-4">{t('reports.colSupplier')}</th>
                         <th className="py-2.5 px-4">{t('reports.id')}</th>
@@ -247,19 +247,19 @@ export default function ReportsPage() {
                         <th className="py-2.5 px-4 text-right">{t('reports.colTotal')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                    <tbody className="divide-y divide-stone-100 dark:divide-stone-800/80">
                       {supplierExpenses.map((sup, idx) => (
-                        <tr key={sup.supplier_id || idx} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                          <td className="py-3 px-4 font-medium text-zinc-900 dark:text-zinc-100">
+                        <tr key={sup.supplier_id || idx} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30">
+                          <td className="py-3 px-4 font-medium text-stone-900 dark:text-stone-100">
                             {sup.name || t('reports.unknownSupplier')}
                           </td>
-                          <td className="py-3 px-4 font-mono text-zinc-500 dark:text-zinc-400">
+                          <td className="py-3 px-4 font-mono text-stone-500 dark:text-stone-400">
                             {sup.tax_id || '—'}
                           </td>
-                          <td className="py-3 px-4 text-center text-zinc-600 dark:text-zinc-300">
+                          <td className="py-3 px-4 text-center text-stone-600 dark:text-stone-300">
                             {sup.count}
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-zinc-900 dark:text-zinc-100">
+                          <td className="py-3 px-4 text-right font-bold text-stone-900 dark:text-stone-100">
                             {formatCurrency(sup.total)}
                           </td>
                         </tr>

@@ -49,7 +49,7 @@ export function Dropdown({
 
       {isOpen && (
         <div
-          className={`absolute z-30 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg py-1.5 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${
+          className={`absolute z-30 mt-2 w-48 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-lg py-1.5 focus:outline-none animate-in fade-in zoom-in-95 duration-100 ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >
@@ -64,7 +64,7 @@ export function Dropdown({
               className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center gap-2.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                 item.danger
                   ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
-                  : 'text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  : 'text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
               {item.icon && <span className="shrink-0">{item.icon}</span>}

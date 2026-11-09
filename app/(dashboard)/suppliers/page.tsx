@@ -97,10 +97,10 @@ export default function SuppliersPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
             Directorio de             {t('suppliers.title')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
             {t('suppliers.subtitle')}
           </p>
         </div>

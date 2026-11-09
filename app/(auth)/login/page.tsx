@@ -38,19 +38,19 @@ export default function LoginPage() {
   return (
     <div className="space-y-6">
       <div className="lg:hidden flex items-center gap-2.5 mb-8">
-        <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+        <div className="w-9 h-9 rounded-xl bg-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
           <Receipt className="w-5 h-5" />
         </div>
-        <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Receipt<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
+        <span className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+          Receipt<span className="text-emerald-700 dark:text-emerald-400">Flow</span>
         </span>
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           {t('auth.welcome')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('auth.loginSubtitle')}
         </p>
       </div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
           <div className="flex justify-end pt-1">
             <Link
               href="/forgot-password"
-              className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 hover:underline"
+              className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-600 hover:underline"
             >
               {t('auth.forgot')}
             </Link>
@@ -106,8 +106,8 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <div className="text-center pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="text-center pt-4 border-t border-stone-200 dark:border-stone-800">
+        <p className="text-sm text-stone-600 dark:text-stone-400">
           {t('auth.noAccount')}{' '}
           <Link
             href="/register"

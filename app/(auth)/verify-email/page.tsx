@@ -66,10 +66,10 @@ function VerifyEmailContent() {
           <CheckCircle2 className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
             {t('auth.verifySuccessTitle')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
             {t('auth.verifySuccessText')}
           </p>
         </div>
@@ -89,15 +89,15 @@ function VerifyEmailContent() {
       <div>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 mb-6 transition-colors dark:text-zinc-400"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 mb-6 transition-colors dark:text-stone-400"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>{t('auth.backToLogin')}</span>
         </Link>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           {t('auth.verifyPageTitle')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('auth.verifyPageSubtitle')}
         </p>
       </div>
@@ -122,7 +122,7 @@ function VerifyEmailContent() {
       )}
 
       <form onSubmit={handleResend} className="space-y-4">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('auth.verifyResendHint')}</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400">{t('auth.verifyResendHint')}</p>
         <Input
           label={t('auth.emailLabel')}
           type="email"
@@ -150,7 +150,7 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   const { t } = useI18n();
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-zinc-400 dark:text-zinc-500">{t('common.loading')}</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-sm text-stone-400 dark:text-stone-500">{t('common.loading')}</div>}>
       <VerifyEmailContent />
     </Suspense>
   );

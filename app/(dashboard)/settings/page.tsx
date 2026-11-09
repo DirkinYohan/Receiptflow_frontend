@@ -67,10 +67,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 max-w-4xl pb-16">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
           {t('settings.title')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('settings.subtitle')}
         </p>
       </div>
@@ -88,7 +88,7 @@ export default function SettingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative group">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center text-xl font-bold overflow-hidden shadow-md">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-700 to-violet-600 text-white flex items-center justify-center text-xl font-bold overflow-hidden shadow-md">
                 {avatarPreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -102,7 +102,7 @@ export default function SettingsPage() {
               </div>
               <label
                 htmlFor="avatar_input"
-                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 flex items-center justify-center cursor-pointer shadow-xs hover:scale-110 transition-transform"
+                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center cursor-pointer shadow-xs hover:scale-110 transition-transform"
                 title={t('settings.changePhoto')}
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -118,20 +118,20 @@ export default function SettingsPage() {
 
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">
                   {user.full_name || user.email}
                 </h3>
                 <Badge variant={user.is_email_verified ? 'success' : 'warning'} size="sm">
                   {user.is_email_verified ? t('settings.verified') : t('settings.unverified')}
                 </Badge>
               </div>
-              <p className="text-xs text-zinc-400 font-mono mt-0.5 dark:text-zinc-500">{user.email}</p>
+              <p className="text-xs text-stone-400 font-mono mt-0.5 dark:text-stone-500">{user.email}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-zinc-500 border-t sm:border-t-0 pt-3 sm:pt-0 dark:text-zinc-400">
+          <div className="flex items-center gap-3 text-xs text-stone-500 border-t sm:border-t-0 pt-3 sm:pt-0 dark:text-stone-400">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+              <Calendar className="w-4 h-4 text-stone-400 dark:text-stone-500" />
               <span>{t('settings.memberSince', { date: formatDate(user.date_joined) })}</span>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <UserIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <UserIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               <span>{t('settings.personalInfo')}</span>
             </CardTitle>
           </CardHeader>
@@ -196,32 +196,32 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <Shield className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>{t('settings.accountDetails')}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs sm:text-sm">
+        <CardContent className="divide-y divide-stone-100 dark:divide-stone-800 text-xs sm:text-sm">
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.userId')}</span>
+            <span className="text-stone-500 dark:text-stone-400">{t('settings.userId')}</span>
             <span className="font-mono font-medium">{user.id}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.username')}</span>
+            <span className="text-stone-500 dark:text-stone-400">{t('settings.username')}</span>
             <span className="font-mono font-medium">{user.username}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.accountStatus')}</span>
+            <span className="text-stone-500 dark:text-stone-400">{t('settings.accountStatus')}</span>
             <span className="text-emerald-600 font-semibold dark:text-emerald-400">
               {user.is_active ? t('settings.active') : t('settings.inactive')}
             </span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.lastLogin')}</span>
-            <span className="text-zinc-500 dark:text-zinc-400">{formatDateTime(user.last_login)}</span>
+            <span className="text-stone-500 dark:text-stone-400">{t('settings.lastLogin')}</span>
+            <span className="text-stone-500 dark:text-stone-400">{formatDateTime(user.last_login)}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-zinc-500 dark:text-zinc-400">{t('settings.lastActivity')}</span>
-            <span className="text-zinc-500 dark:text-zinc-400">{formatDateTime(user.last_activity_at)}</span>
+            <span className="text-stone-500 dark:text-stone-400">{t('settings.lastActivity')}</span>
+            <span className="text-stone-500 dark:text-stone-400">{formatDateTime(user.last_activity_at)}</span>
           </div>
         </CardContent>
       </Card>

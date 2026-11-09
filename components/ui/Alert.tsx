@@ -45,14 +45,14 @@ export function Alert({
       {icons[type]}
       <div className="flex-1 min-w-0">
         {title && <h5 className="font-semibold mb-0.5">{title}</h5>}
-        <div className="text-zinc-600 dark:text-zinc-300 leading-relaxed text-xs sm:text-sm">
+        <div className="text-stone-600 dark:text-stone-300 leading-relaxed text-xs sm:text-sm">
           {children}
         </div>
       </div>
       {onClose && (
         <button
           onClick={onClose}
-          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 dark:text-zinc-500"
+          className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 dark:text-stone-500"
           aria-label={t('common.closeAlert')}
         >
           <X className="w-4 h-4" />

@@ -125,7 +125,7 @@ export function CategoryFormModal({
         />
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
             {t('categoryForm.color')}
           </label>
           <div className="flex items-center gap-2 flex-wrap">
@@ -136,7 +136,7 @@ export function CategoryFormModal({
                 onClick={() => setColor(c)}
                 style={{ backgroundColor: c }}
                 className={`w-7 h-7 rounded-full transition-transform cursor-pointer ${
-                  color === c ? 'ring-3 ring-indigo-500 ring-offset-2 scale-110' : 'opacity-80 hover:opacity-100'
+                  color === c ? 'ring-3 ring-emerald-600 ring-offset-2 scale-110' : 'opacity-80 hover:opacity-100'
                 }`}
               />
             ))}
@@ -144,14 +144,14 @@ export function CategoryFormModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
             {t('categoryForm.descriptionLabel')}
           </label>
           <textarea
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600"
             placeholder={t('categoryForm.descriptionPlaceholder')}
             disabled={isLoading}
           />
@@ -163,15 +163,15 @@ export function CategoryFormModal({
             id="cat_active"
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
-            className="rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 dark:text-indigo-400"
+            className="rounded-sm border-stone-300 dark:border-stone-700 text-emerald-700 focus:ring-emerald-600 dark:text-emerald-400"
             disabled={isLoading}
           />
-          <label htmlFor="cat_active" className="text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
+          <label htmlFor="cat_active" className="text-xs text-stone-600 dark:text-stone-400 cursor-pointer">
             {t('categoryForm.active')}
           </label>
         </div>
 
-        <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="pt-3 flex items-center justify-end gap-3 border-t border-stone-200 dark:border-stone-800">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
             {t('common.cancel')}
           </Button>

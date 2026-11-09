@@ -20,8 +20,8 @@ export function UserMenu() {
     'U';
 
   const trigger = (
-    <div className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-semibold text-xs shadow-xs">
+    <div className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-700 to-violet-500 text-white flex items-center justify-center font-semibold text-xs shadow-xs">
         {user.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -34,10 +34,10 @@ export function UserMenu() {
         )}
       </div>
       <div className="hidden md:block text-left">
-        <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+        <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 line-clamp-1">
           {user.full_name || user.email}
         </p>
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-1">
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-1">
           {user.email}
         </p>
       </div>

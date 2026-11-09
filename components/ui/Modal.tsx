@@ -59,23 +59,23 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div
-        className="fixed inset-0 bg-zinc-950/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-stone-950/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       <div
-        className={`relative w-full ${sizes[size]} rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800 transition-all transform animate-in fade-in zoom-in-95 duration-200 z-10 overflow-hidden my-8 max-h-[90vh] flex flex-col`}
+        className={`relative w-full ${sizes[size]} rounded-2xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200 dark:border-stone-800 transition-all transform animate-in fade-in zoom-in-95 duration-200 z-10 overflow-hidden my-8 max-h-[90vh] flex flex-col`}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-800 shrink-0">
             <div>
               {title && (
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
                   {title}
                 </h3>
               )}
               {description && (
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
                   {description}
                 </p>
               )}
@@ -83,7 +83,7 @@ export function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors dark:text-zinc-500"
+                className="rounded-lg p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors dark:text-stone-500"
                 aria-label={t('common.closeModal')}
               >
                 <X className="w-5 h-5" />

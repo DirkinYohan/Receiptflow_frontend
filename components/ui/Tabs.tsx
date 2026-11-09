@@ -19,7 +19,7 @@ export interface TabsProps {
 export function Tabs({ tabs, activeTab, onTabChange, className = '' }: TabsProps) {
   return (
     <div
-      className={`flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto no-scrollbar ${className}`}
+      className={`flex items-center gap-1 border-b border-stone-200 dark:border-stone-800 overflow-x-auto no-scrollbar ${className}`}
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
@@ -29,8 +29,8 @@ export function Tabs({ tabs, activeTab, onTabChange, className = '' }: TabsProps
             onClick={() => onTabChange(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               isActive
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700'
+                ? 'border-emerald-700 text-emerald-700 dark:text-emerald-400 font-semibold'
+                : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:border-stone-300 dark:hover:border-stone-700'
             }`}
           >
             {tab.icon && <span>{tab.icon}</span>}
@@ -39,8 +39,8 @@ export function Tabs({ tabs, activeTab, onTabChange, className = '' }: TabsProps
               <span
                 className={`ml-1 px-1.5 py-0.5 text-[11px] rounded-full ${
                   isActive
-                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                    : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                    : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'
                 }`}
               >
                 {tab.count}

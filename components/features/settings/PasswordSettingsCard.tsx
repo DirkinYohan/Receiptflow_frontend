@@ -56,7 +56,7 @@ export function PasswordSettingsCard() {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <Lock className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('settings.security')}</span>
         </CardTitle>
       </CardHeader>

@@ -20,7 +20,7 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
   const { locale, t } = useI18n();
   return (
         <table className="w-full text-left text-xs sm:text-sm">
-          <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-semibold uppercase tracking-wider text-[11px]">
+          <thead className="bg-stone-50 dark:bg-stone-800/60 border-b border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider text-[11px]">
             <tr>
               <th className="py-3 px-4">{t('expenses.colDescription')}</th>
               <th className="py-3 px-4">{t('expenses.colCategory')}</th>
@@ -30,11 +30,11 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
               <th className="py-3 px-4 text-right">{t('common.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+          <tbody className="divide-y divide-stone-100 dark:divide-stone-800/80">
             {expenses.map((expense) => (
               <tr
                 key={expense.id}
-                className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors group cursor-pointer"
+                className="hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors group cursor-pointer"
                 onClick={() => onOpen(expense.id)}
               >
                 <td className="py-3.5 px-4">
@@ -43,13 +43,13 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
                       <Receipt className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[240px]">
+                      <p className="font-semibold text-stone-900 dark:text-stone-100 truncate max-w-[240px]">
                         {expense.description}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-zinc-400 mt-0.5 dark:text-zinc-500">
+                      <div className="flex items-center gap-2 text-[11px] text-stone-400 mt-0.5 dark:text-stone-500">
                         {expense.supplier_name && <span>{expense.supplier_name}</span>}
                         {expense.is_recurring && (
-                          <span className="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 font-medium">
+                          <span className="inline-flex items-center gap-0.5 text-emerald-700 dark:text-emerald-400 font-medium">
                             <Repeat className="w-3 h-3" />
                             <span>{t('expenses.recurring')}</span>
                           </span>
@@ -59,21 +59,21 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
                   </div>
                 </td>
     
-                <td className="py-3.5 px-4 text-zinc-600 dark:text-zinc-300">
+                <td className="py-3.5 px-4 text-stone-600 dark:text-stone-300">
                   {localizeCategoryName(expense.category_name, locale) || t('common.noCategory')}
                 </td>
     
-                <td className="py-3.5 px-4 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                <td className="py-3.5 px-4 text-stone-500 dark:text-stone-400 whitespace-nowrap">
                   {formatDate(expense.incurred_at)}
                 </td>
     
-                <td className="py-3.5 px-4 text-zinc-500 dark:text-zinc-400">
+                <td className="py-3.5 px-4 text-stone-500 dark:text-stone-400">
                   {expense.payment_method
                     ? t(`method.${expense.payment_method}`)
                     : '—'}
                 </td>
     
-                <td className="py-3.5 px-4 font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
+                <td className="py-3.5 px-4 font-bold text-stone-900 dark:text-stone-100 whitespace-nowrap">
                   {formatCurrency(expense.total_amount, expense.currency)}
                 </td>
     
@@ -84,7 +84,7 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
                   >
                     <Link
                       href={`/expenses/${expense.id}`}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-zinc-800 transition-colors dark:text-zinc-500 dark:hover:text-indigo-400"
+                      className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-stone-800 transition-colors dark:text-stone-500 dark:hover:text-emerald-400"
                       title={t('expenses.viewDetail')}
                     >
                       <Eye className="w-4 h-4" />
@@ -93,7 +93,7 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
                     <button
                       title={t('expenses.edit')}
                       onClick={(e) => onEdit(expense, e)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
+                      className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer dark:text-stone-500 dark:hover:text-emerald-400"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -102,7 +102,7 @@ export function ExpensesTable({ expenses, deletingId, onOpen, onEdit, onDelete }
                       title={t('expenses.delete')}
                       disabled={deletingId === expense.id}
                       onClick={(e) => onDelete(expense, e)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:opacity-50 dark:text-zinc-500 dark:hover:text-rose-400"
+                      className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-stone-800 transition-colors cursor-pointer disabled:opacity-50 dark:text-stone-500 dark:hover:text-rose-400"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

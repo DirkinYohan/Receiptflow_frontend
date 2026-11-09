@@ -89,10 +89,10 @@ export default function CategoriesPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
             {t('categories.title')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
             {t('categories.subtitle')}
           </p>
         </div>
@@ -164,7 +164,7 @@ export default function CategoriesPage() {
             return (
               <div
                 key={cat.id}
-                className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
+                className="p-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -176,10 +176,10 @@ export default function CategoriesPage() {
                         <Tag className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-sm sm:text-base">
+                        <h4 className="font-semibold text-stone-900 dark:text-stone-100 truncate text-sm sm:text-base">
                           {localizeCategoryName(cat, locale)}
                         </h4>
-                        <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                        <span className="text-[11px] text-stone-400 dark:text-stone-500">
                           {cat.usage_count !== undefined
                             ? t('categories.usages', { count: cat.usage_count })
                             : t('categories.active')}
@@ -193,14 +193,14 @@ export default function CategoriesPage() {
                   </div>
 
                   {cat.description && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-3 line-clamp-2 leading-relaxed">
                       {localizeCategoryDescription(cat, locale)}
                     </p>
                   )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-zinc-400 dark:text-zinc-500">
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-stone-400 dark:text-stone-500">
                     {isSystem ? (
                       <span className="inline-flex items-center gap-1">
                         <Lock className="w-3.5 h-3.5" />
@@ -218,14 +218,14 @@ export default function CategoriesPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEdit(cat)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
+                        className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer dark:text-stone-500 dark:hover:text-emerald-400"
                         title={t('common.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(cat)}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-rose-400"
+                        className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-stone-800 transition-colors cursor-pointer dark:text-stone-500 dark:hover:text-rose-400"
                         title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />

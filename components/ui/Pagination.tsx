@@ -29,7 +29,7 @@ export function Pagination({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 text-sm text-zinc-600 dark:text-zinc-400 ${className}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 text-sm text-stone-600 dark:text-stone-400 ${className}`}
     >
       <div>
         {totalCount !== undefined ? (
@@ -43,20 +43,20 @@ export function Pagination({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>{t('common.previous')}</span>
         </button>
 
-        <span className="px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="px-3 py-1 text-xs font-medium text-stone-700 dark:text-stone-300">
           {currentPage} / {totalPages}
         </span>
 
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-medium cursor-pointer"
         >
           <span>{t('common.next')}</span>
           <ChevronRight className="w-4 h-4" />

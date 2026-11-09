@@ -16,19 +16,19 @@ export function SupplierCard({ supplier, onToggleFavorite, onEdit, onDelete }: S
   const { t } = useI18n();
   return (
         <div
-          className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
+          className="p-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between"
         >
           <div>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-sm sm:text-base">
+                  <h4 className="font-semibold text-stone-900 dark:text-stone-100 truncate text-sm sm:text-base">
                     {supplier.name}
                   </h4>
-                  <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 block truncate">
+                  <span className="text-xs font-mono text-stone-500 dark:text-stone-400 block truncate">
                     {supplier.tax_id ? `${t('suppliers.id')}: ${supplier.tax_id}` : t('suppliers.noId')}
                   </span>
                 </div>
@@ -40,34 +40,34 @@ export function SupplierCard({ supplier, onToggleFavorite, onEdit, onDelete }: S
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   supplier.is_favorite
                     ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40'
-                    : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 dark:text-zinc-600'
+                    : 'text-stone-300 hover:text-amber-400 hover:bg-stone-50 dark:hover:bg-stone-800 dark:text-stone-600'
                 }`}
               >
                 <Star className={`w-4 h-4 ${supplier.is_favorite ? 'fill-current' : ''}`} />
               </button>
             </div>
 
-            <div className="mt-4 space-y-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="mt-4 space-y-1.5 text-xs text-stone-500 dark:text-stone-400">
               {supplier.email && (
                 <p className="flex items-center gap-2 truncate">
-                  <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+                  <Mail className="w-3.5 h-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
                   <span className="truncate">{supplier.email}</span>
                 </p>
               )}
               {supplier.phone && (
                 <p className="flex items-center gap-2 truncate">
-                  <Phone className="w-3.5 h-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+                  <Phone className="w-3.5 h-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
                   <span>{supplier.phone}</span>
                 </p>
               )}
               {supplier.address && (
-                <p className="truncate text-zinc-400 dark:text-zinc-500">{supplier.address}</p>
+                <p className="truncate text-stone-400 dark:text-stone-500">{supplier.address}</p>
               )}
             </div>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-3 text-zinc-400 font-medium dark:text-zinc-500">
+          <div className="mt-5 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-3 text-stone-400 font-medium dark:text-stone-500">
               <span className="inline-flex items-center gap-1">
                 <FileText className="w-3.5 h-3.5" />
                 <span>{t('suppliers.docs', { count: supplier.document_count ?? 0 })}</span>
@@ -81,14 +81,14 @@ export function SupplierCard({ supplier, onToggleFavorite, onEdit, onDelete }: S
             <div className="flex items-center gap-1">
               <button
                 onClick={() => onEdit(supplier)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-indigo-400"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer dark:text-stone-500 dark:hover:text-emerald-400"
                 title={t('common.edit')}
               >
                 <Edit className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onDelete(supplier)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer dark:text-zinc-500 dark:hover:text-rose-400"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-stone-800 transition-colors cursor-pointer dark:text-stone-500 dark:hover:text-rose-400"
                 title={t('common.delete')}
               >
                 <Trash2 className="w-4 h-4" />

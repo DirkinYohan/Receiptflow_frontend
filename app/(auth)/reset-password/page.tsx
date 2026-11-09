@@ -61,10 +61,10 @@ function ResetPasswordForm() {
           <CheckCircle2 className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
             {t('auth.resetSuccessTitle')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
             {t('auth.resetSuccessText')}
           </p>
         </div>
@@ -80,15 +80,15 @@ function ResetPasswordForm() {
       <div>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 mb-6 transition-colors dark:text-zinc-400"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 mb-6 transition-colors dark:text-stone-400"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>{t('auth.backToLogin')}</span>
         </Link>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           {t('auth.resetPageTitle')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('auth.resetPageSubtitle')}
         </p>
       </div>
@@ -117,7 +117,7 @@ function ResetPasswordForm() {
           )}
 
           {email && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="text-sm text-stone-600 dark:text-stone-300">
               {t('auth.resetForAccount')} <strong className="break-all">{email}</strong>
             </p>
           )}
@@ -162,7 +162,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   const { t } = useI18n();
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-zinc-400 dark:text-zinc-500">{t('common.loading')}</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-sm text-stone-400 dark:text-stone-500">{t('common.loading')}</div>}>
       <ResetPasswordForm />
     </Suspense>
   );

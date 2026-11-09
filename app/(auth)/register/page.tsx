@@ -83,19 +83,19 @@ export default function RegisterPage() {
   return (
     <div className="space-y-6">
       <div className="lg:hidden flex items-center gap-2.5 mb-8">
-        <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+        <div className="w-9 h-9 rounded-xl bg-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
           <Receipt className="w-5 h-5" />
         </div>
-        <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          Receipt<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
+        <span className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+          Receipt<span className="text-emerald-700 dark:text-emerald-400">Flow</span>
         </span>
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           {t('auth.registerTitle')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('auth.registerSubtitle')}
         </p>
       </div>
@@ -182,12 +182,12 @@ export default function RegisterPage() {
             required
             checked={formData.accept_terms}
             onChange={handleChange}
-            className="mt-1 h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer dark:text-indigo-400"
+            className="mt-1 h-4 w-4 rounded-sm border-stone-300 dark:border-stone-700 text-emerald-700 focus:ring-emerald-600 cursor-pointer dark:text-emerald-400"
             disabled={isLoading}
           />
           <label
             htmlFor="accept_terms"
-            className="text-xs text-zinc-600 dark:text-zinc-400 leading-normal"
+            className="text-xs text-stone-600 dark:text-stone-400 leading-normal"
           >
             {t('auth.acceptTerms')}
           </label>
@@ -203,12 +203,12 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <div className="text-center pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="text-center pt-4 border-t border-stone-200 dark:border-stone-800">
+        <p className="text-sm text-stone-600 dark:text-stone-400">
           {t('auth.hasAccount')}{' '}
           <Link
             href="/login"
-            className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 hover:underline"
+            className="font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-600 hover:underline"
           >
             {t('auth.loginCta')}
           </Link>

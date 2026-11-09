@@ -226,7 +226,7 @@ export function DocumentExtractedDataModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+          <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
             {t('edit.notes')}
           </label>
           <textarea
@@ -234,12 +234,12 @@ export function DocumentExtractedDataModal({
             rows={2}
             value={formData.notes}
             onChange={handleChange}
-            className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600"
             disabled={isLoading}
           />
         </div>
 
-        <div className="pt-3 flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="pt-3 flex items-center justify-end gap-3 border-t border-stone-200 dark:border-stone-800">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
             {t('common.cancel')}
           </Button>

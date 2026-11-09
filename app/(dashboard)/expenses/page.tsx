@@ -98,10 +98,10 @@ export default function ExpensesPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
             {t('expenses.title')}
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
             {t('expenses.subtitle')}
           </p>
         </div>
@@ -132,35 +132,35 @@ export default function ExpensesPage() {
 
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
               {t('expenses.filtered')}
             </span>
-            <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+            <p className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-1">
               {formatCurrency(stats.total_amount)}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
               {t('expenses.average')}
             </span>
-            <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+            <p className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-1">
               {formatCurrency(stats.average_amount)}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
               {t('expenses.totalCount')}
             </span>
-            <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+            <p className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-1">
               {stats.count}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-2xs">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
               {t('expenses.recurringCount')}
             </span>
-            <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">
               {stats.recurring_count}
             </p>
           </div>
@@ -262,7 +262,7 @@ export default function ExpensesPage() {
           }
         />
       ) : (
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-2xs">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <ExpensesTable
               expenses={expenses}

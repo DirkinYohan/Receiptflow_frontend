@@ -31,17 +31,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow shadow-indigo-500/25 focus:ring-indigo-500 border border-transparent',
+        'bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm hover:shadow shadow-emerald-600/25 focus:ring-emerald-600 border border-transparent',
       secondary:
-        'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 focus:ring-zinc-400 border border-transparent',
+        'bg-stone-100 hover:bg-stone-200 text-stone-900 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-100 focus:ring-stone-400 border border-transparent',
       outline:
-        'border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 focus:ring-indigo-500',
+        'border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/80 focus:ring-emerald-600',
       danger:
         'bg-rose-600 hover:bg-rose-700 text-white shadow-sm hover:shadow shadow-rose-500/25 focus:ring-rose-500 border border-transparent',
       success:
         'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow shadow-emerald-500/25 focus:ring-emerald-500 border border-transparent',
       ghost:
-        'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:ring-zinc-400 border border-transparent',
+        'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 focus:ring-stone-400 border border-transparent',
     };
 
     const sizes = {

@@ -28,10 +28,10 @@ export function ErrorState({
       <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-3">
         <AlertCircle className="w-6 h-6" />
       </div>
-      <h4 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
+      <h4 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">
         {resolvedTitle}
       </h4>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-sm mb-5 leading-relaxed">
+      <p className="text-sm text-stone-600 dark:text-stone-400 max-w-sm mb-5 leading-relaxed">
         {resolvedMessage}
       </p>
       {onRetry && (

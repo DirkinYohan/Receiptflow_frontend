@@ -39,15 +39,15 @@ export default function ForgotPasswordPage() {
       <div>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 mb-6 transition-colors dark:text-zinc-400"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 mb-6 transition-colors dark:text-stone-400"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>{t('auth.backToLogin')}</span>
         </Link>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
           {t('auth.forgotPageTitle')}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
           {t('auth.forgotPageSubtitle')}
         </p>
       </div>

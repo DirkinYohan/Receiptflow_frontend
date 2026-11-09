@@ -21,7 +21,7 @@ export function CategoryBreakdownChart({
     return (
       <div className="space-y-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-10 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl animate-pulse" />
+          <div key={i} className="h-10 bg-stone-100 dark:bg-stone-800/50 rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -29,7 +29,7 @@ export function CategoryBreakdownChart({
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-sm text-zinc-400 dark:text-zinc-500">
+      <div className="h-48 flex items-center justify-center text-sm text-stone-400 dark:text-stone-500">
         {t('reports.noCategoryData')}
       </div>
     );
@@ -63,22 +63,22 @@ export function CategoryBreakdownChart({
                   className="w-2.5 h-2.5 rounded-full shrink-0"
                   style={{ backgroundColor: color }}
                 />
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                <span className="font-medium text-stone-900 dark:text-stone-100">
                   {localizeCategoryName(cat, locale) || t('common.noCategory')}
                 </span>
-                <span className="text-zinc-400 text-xs dark:text-zinc-500">({cat.count} reg.)</span>
+                <span className="text-stone-400 text-xs dark:text-stone-500">({cat.count} reg.)</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                <span className="font-semibold text-stone-900 dark:text-stone-100">
                   {formatCurrency(totalNum, currency)}
                 </span>
-                <span className="text-zinc-400 font-medium text-xs w-8 text-right dark:text-zinc-500">
+                <span className="text-stone-400 font-medium text-xs w-8 text-right dark:text-stone-500">
                   {pct}%
                 </span>
               </div>
             </div>
 
-            <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct}%`, backgroundColor: color }}

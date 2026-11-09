@@ -20,9 +20,9 @@ export function LoadingSpinner({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center p-8 text-center text-zinc-500 dark:text-zinc-400 gap-3 ${className}`}
+      className={`flex flex-col items-center justify-center p-8 text-center text-stone-500 dark:text-stone-400 gap-3 ${className}`}
     >
-      <Loader2 className={`${sizes[size]} animate-spin text-indigo-600 dark:text-indigo-400`} />
+      <Loader2 className={`${sizes[size]} animate-spin text-emerald-700 dark:text-emerald-400`} />
       {text && <p className="text-sm font-medium animate-pulse">{text}</p>}
     </div>
   );

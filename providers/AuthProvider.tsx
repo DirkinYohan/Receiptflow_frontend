@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { User, LoginCredentials, RegisterPayload } from '@/types/auth';
 import { authService } from '@/services/auth.service';
 import { usersService } from '@/services/users.service';
-import { getAccessToken, setTokens, clearTokens } from '@/lib/auth-tokens';
+import { getAccessToken, setTokens, clearTokens, isSessionIdle, markActivity } from '@/lib/auth-tokens';
 import { useToast } from './ToastProvider';
 import { translate } from '@/lib/i18n/translate';
 
@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials, remember?: boolean) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -22,6 +22,10 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const;
+const ACTIVITY_THROTTLE_MS = 30_000;
+const IDLE_CHECK_MS = 60_000;
 
 const PUBLIC_ROUTES = [
   '/',
@@ -87,6 +91,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchCurrentUser, resetCache, router, toastInfo]);
 
   useEffect(() => {
+    if (!user) return;
+
+    let lastMark = 0;
+    const recordActivity = () => {
+      const now = Date.now();
+      if (now - lastMark > ACTIVITY_THROTTLE_MS) {
+        lastMark = now;
+        markActivity(now);
+      }
+    };
+    const expireIfIdle = () => {
+      if (isSessionIdle()) {
+        window.dispatchEvent(new CustomEvent('auth:expired'));
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') expireIfIdle();
+    };
+
+    ACTIVITY_EVENTS.forEach((name) => window.addEventListener(name, recordActivity, { passive: true }));
+    document.addEventListener('visibilitychange', onVisibility);
+    const timer = window.setInterval(expireIfIdle, IDLE_CHECK_MS);
+    return () => {
+      ACTIVITY_EVENTS.forEach((name) => window.removeEventListener(name, recordActivity));
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.clearInterval(timer);
+    };
+  }, [user]);
+
+  useEffect(() => {
     if (isLoading) return;
 
     const isPublic = PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
@@ -99,13 +133,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, pathname, router]);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials, remember = false) => {
     setIsLoading(true);
     try {
       const res = await authService.login(credentials);
       resetCache();
       if (res.tokens) {
-        setTokens(res.tokens);
+        setTokens(res.tokens, remember);
       }
       if (res.user) {
         setUser(res.user);
@@ -127,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       resetCache();
-      setTokens(res.tokens);
+      setTokens(res.tokens, false);
       if (res.user) {
         setUser(res.user);
       }

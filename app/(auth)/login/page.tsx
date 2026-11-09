@@ -15,6 +15,7 @@ export default function LoginPage() {
   const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -24,7 +25,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login({ email, password });
+      await login({ email, password }, remember);
     } catch (err: unknown) {
       const apiErr = err as ApiError;
       setErrorMessage(
@@ -95,6 +96,17 @@ export default function LoginPage() {
             </Link>
           </div>
         </div>
+
+        <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            disabled={isLoading}
+            className="h-4 w-4 rounded-sm border-stone-300 dark:border-stone-700 text-emerald-700 focus:ring-emerald-600 cursor-pointer dark:text-emerald-400"
+          />
+          <span>{t('auth.rememberMe')}</span>
+        </label>
 
         <Button
           type="submit"

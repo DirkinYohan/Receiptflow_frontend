@@ -35,6 +35,7 @@ test('the expense form loads the expense to edit and starts empty for a new one'
   await page.addInitScript((token) => {
     localStorage.setItem('receiptflow_access_token', token);
     localStorage.setItem('receiptflow_refresh_token', 'refresh-token');
+    localStorage.setItem('receiptflow_remember', '1');
   }, fakeAccessToken);
 
   await page.goto('/expenses');

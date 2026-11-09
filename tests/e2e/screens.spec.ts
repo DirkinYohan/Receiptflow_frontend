@@ -5,6 +5,7 @@ async function signIn(page: Page) {
   await page.addInitScript((token) => {
     localStorage.setItem('receiptflow_access_token', token);
     localStorage.setItem('receiptflow_refresh_token', 'refresh-token');
+    localStorage.setItem('receiptflow_remember', '1');
   }, fakeAccessToken);
 }
 

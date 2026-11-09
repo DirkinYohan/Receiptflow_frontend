@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CalendarClock, CheckCircle2, Clock, FileText, RefreshCw, Upload, Wallet } from 'lucide-react';
@@ -9,34 +9,27 @@ import { SummaryCard } from '@/components/ui/SummaryCard';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { RecentActivity } from '@/components/features/dashboard/RecentActivity';
 import { BudgetSummary } from '@/components/features/categories/BudgetsPanel';
-import { formatCurrency, formatMonth } from '@/lib/formatters';
+import { formatCurrency, formatMonth, localDateInput } from '@/lib/formatters';
 import { qk } from '@/lib/query/keys';
-import {
-  useDashboardSummary,
-  useDocumentStats,
-  useMonthlyExpenses,
-  usePayables,
-  useRecentDocuments,
-  useRecentExpenses,
-} from '@/hooks/queries';
+import { useDashboardSummary, useDocumentStats, useMonthlyExpenses, usePayables, useRecentDocuments, useRecentExpenses } from '@/hooks/queries';
 import { useI18n } from '@/providers/I18nProvider';
-
-const PERIODS = [
-  { labelKey: 'dashboard.period1', value: 1 },
-  { labelKey: 'dashboard.period3', value: 3 },
-  { labelKey: 'dashboard.period6', value: 6 },
-  { labelKey: 'dashboard.period12', value: 12 },
-];
+import { usePeriodFilter } from '@/hooks/usePeriodFilter';
+import { PeriodFilter } from '@/components/features/reports/PeriodFilter';
 
 export default function DashboardPage() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
-  const [periodMonths, setPeriodMonths] = useState(6);
-  const range = { months: periodMonths };
+  const period = usePeriodFilter();
+  const { range } = period;
 
   const summaryQuery = useDashboardSummary(range);
   const statsQuery = useDocumentStats();
   const monthlyQuery = useMonthlyExpenses(range);
+  const [currentMonthRange] = useState(() => {
+    const now = new Date();
+    return { start_date: localDateInput(new Date(now.getFullYear(), now.getMonth(), 1)), end_date: localDateInput(now) };
+  });
+  const currentMonthQuery = useMonthlyExpenses(currentMonthRange);
   const recentExpensesQuery = useRecentExpenses(5);
   const recentDocumentsQuery = useRecentDocuments(5);
   const payablesQuery = usePayables();
@@ -68,7 +61,7 @@ export default function DashboardPage() {
   const overdue = payables?.buckets.overdue ?? [];
   const dueSoon = payables?.buckets.due_soon ?? [];
   const urgent = overdue.length ? overdue : dueSoon;
-  const thisMonth = monthlyExpenses.length ? monthlyExpenses[monthlyExpenses.length - 1] : null;
+  const thisMonth = currentMonthQuery.data?.[0] ?? null;
   const maxMonth = Math.max(...monthlyExpenses.map((item) => Number(item.total) || 0), 1);
 
   return (
@@ -79,20 +72,7 @@ export default function DashboardPage() {
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-xl border border-stone-200 bg-white p-1 dark:border-stone-800 dark:bg-stone-900">
-            {PERIODS.map((period) => (
-              <button
-                key={period.value}
-                type="button"
-                onClick={() => setPeriodMonths(period.value)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                  periodMonths === period.value ? 'bg-stone-900 text-white dark:bg-stone-700' : 'text-stone-600 dark:text-stone-400'
-                }`}
-              >
-                {t(period.labelKey)}
-              </button>
-            ))}
-          </div>
+          <PeriodFilter filter={period} />
           <button
             type="button"
             onClick={refresh}

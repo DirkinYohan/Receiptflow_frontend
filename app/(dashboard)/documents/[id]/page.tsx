@@ -24,16 +24,7 @@ import { qk } from '@/lib/query/keys';
 import { invalidateAfter } from '@/lib/query/invalidate';
 import { useI18n } from '@/providers/I18nProvider';
 import { ApiError } from '@/types/api';
-
-function Row({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-stone-100 py-3 text-sm last:border-0 dark:border-stone-800">
-      <span className="text-stone-500 dark:text-stone-400">{label}</span>
-      <span className="text-right font-medium text-stone-900 dark:text-stone-100">{value}</span>
-    </div>
-  );
-}
+import { DetailRow } from '@/components/ui/DetailRow';
 
 export default function DocumentDetailPage() {
   const params = useParams();
@@ -213,15 +204,15 @@ export default function DocumentDetailPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DetailSection title={t('detail.important')}>
-          <Row label={t('detail.supplier')} value={supplier} />
-          <Row label={t('detail.identification')} value={supplierId} />
-          <Row label={t('detail.number')} value={document.document_number} />
-          <Row label={t('detail.date')} value={formatDate(document.issued_at)} />
-          <Row label={t('detail.due')} value={formatDate(document.due_date)} />
-          <Row label={t('detail.subtotal')} value={money(document.subtotal_amount)} />
-          <Row label={t('detail.tax')} value={money(document.tax_amount)} />
-          <Row label={t('detail.currency')} value={document.currency} />
-          <Row
+          <DetailRow label={t('detail.supplier')} value={supplier} />
+          <DetailRow label={t('detail.identification')} value={supplierId} />
+          <DetailRow label={t('detail.number')} value={document.document_number} />
+          <DetailRow label={t('detail.date')} value={formatDate(document.issued_at)} />
+          <DetailRow label={t('detail.due')} value={formatDate(document.due_date)} />
+          <DetailRow label={t('detail.subtotal')} value={money(document.subtotal_amount)} />
+          <DetailRow label={t('detail.tax')} value={money(document.tax_amount)} />
+          <DetailRow label={t('detail.currency')} value={document.currency} />
+          <DetailRow
             label={t('detail.method')}
             value={document.payment_method ? t(`method.${document.payment_method}`) : ''}
           />

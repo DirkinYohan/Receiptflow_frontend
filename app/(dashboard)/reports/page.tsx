@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { Calendar, Building2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -9,17 +9,13 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ExpenseEvolutionChart } from '@/components/features/dashboard/ExpenseEvolutionChart';
 import { CategoryBreakdownChart } from '@/components/features/dashboard/CategoryBreakdownChart';
-import {
-  useDashboardSummary,
-  useExpensesByCategory,
-  useExpensesBySupplier,
-  useMonthlyExpenses,
-} from '@/hooks/queries';
+import { useDashboardSummary, useExpensesByCategory, useExpensesBySupplier, useMonthlyExpenses } from '@/hooks/queries';
 import { qk } from '@/lib/query/keys';
 import { expensesService } from '@/services/expenses.service';
 import { useToast } from '@/hooks/useToast';
 import { formatCurrency, localDateInput } from '@/lib/formatters';
 import { useI18n } from '@/providers/I18nProvider';
+import { StatCard } from '@/components/ui/StatCard';
 
 type Preset = 'month' | 'quarter' | 'year' | 'all';
 
@@ -180,47 +176,28 @@ export default function ReportsPage() {
       ) : (
         <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
-                {t('reports.periodTotal')}
-              </span>
-              <p className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">
-                {formatCurrency(summary?.total_expenses ?? 0)}
-              </p>
-              <span className="text-xs text-zinc-500 mt-1 block dark:text-zinc-400">
-                {t('reports.expensesCounted', { count: summary?.expenses_count ?? 0 })}
-              </span>
-            </Card>
-
-            <Card className="p-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
-                {t('reports.average')}
-              </span>
-              <p className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">
-                {formatCurrency(summary?.average_expense ?? 0)}
-              </p>
-              <span className="text-xs text-zinc-500 mt-1 block dark:text-zinc-400">{t('reports.perTransaction')}</span>
-            </Card>
-
-            <Card className="p-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
-                {t('reports.max')}
-              </span>
-              <p className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">
-                {formatCurrency(summary?.max_expense ?? 0)}
-              </p>
-              <span className="text-xs text-zinc-500 mt-1 block dark:text-zinc-400">{t('reports.maxHint')}</span>
-            </Card>
-
-            <Card className="p-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block dark:text-zinc-500">
-                {t('reports.receipts')}
-              </span>
-              <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                {summary?.documents_processed ?? 0} / {summary?.documents_count ?? 0}
-              </p>
-              <span className="text-xs text-zinc-500 mt-1 block dark:text-zinc-400">{t('reports.processed')}</span>
-            </Card>
+            <StatCard
+              label={t('reports.periodTotal')}
+              value={formatCurrency(summary?.total_expenses ?? 0)}
+              hint={t('reports.expensesCounted', { count: summary?.expenses_count ?? 0 })}
+            />
+            <StatCard
+              label={t('reports.average')}
+              value={formatCurrency(summary?.average_expense ?? 0)}
+              hint={t('reports.perTransaction')}
+            />
+            <StatCard
+              label={t('reports.max')}
+              value={formatCurrency(summary?.max_expense ?? 0)}
+              hint={t('reports.maxHint')}
+              valueClassName="text-indigo-600 dark:text-indigo-400"
+            />
+            <StatCard
+              label={t('reports.receipts')}
+              value={`${summary?.documents_processed ?? 0} / ${summary?.documents_count ?? 0}`}
+              hint={t('reports.processed')}
+              valueClassName="text-emerald-600 dark:text-emerald-400"
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
